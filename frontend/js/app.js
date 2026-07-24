@@ -104,6 +104,13 @@ async function analyzeImage() {
   loadingState.style.display = 'block';
   resultsDiv.style.display = 'none';
 
+  // Lock out header navigation links during analysis to prevent premature page switching
+  const navLinks = document.querySelectorAll('header nav a');
+  navLinks.forEach(link => {
+    link.style.pointerEvents = 'none';
+    link.style.opacity = '0.5';
+  });
+
   const base64Data = capturedImage.split(',')[1];
   const mediaType = capturedImage.split(';')[0].split(':')[1];
 
@@ -122,6 +129,13 @@ async function analyzeImage() {
     loadingState.style.display = 'none';
     analyzeBtn.disabled = false;
     analyzeBtn.style.display = 'block';
+    
+    // Re-enable navigation if an error occurs
+    navLinks.forEach(link => {
+      link.style.pointerEvents = 'auto';
+      link.style.opacity = '1';
+    });
+
     alert(err.message || 'Analysis failed. Please try again with a clearer face photo.');
     console.error(err);
   }
