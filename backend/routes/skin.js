@@ -109,11 +109,19 @@ Return exactly this structure:
   } catch (err) {
     console.error('Analysis error:', err);
 
-    // Rate limit error handling (HTTP 429)
+    // Enhanced rate limit error handling with dynamic countdown extraction
     if (err.status === 429 || (err.message && err.message.toLowerCase().includes('rate limit'))) {
-      return res.status(429).json({ 
-        error: 'Rate limit reached. Please wait a moment before trying another scan.' 
-      });
+      let retryMessage = 'Rate limit reached. Please wait a moment before trying another scan.';
+      try {
+        const errorBody = err.error?.error?.message || err.message || '';
+        const match = errorBody.match(/try again in ([0-9ms.]+)/i);
+        if (match && match[1]) {
+          retryMessage = `Rate limit reached. Please try again in ${match[1]}.`;
+        }
+      } catch (parseErr) {
+        console.error('Failed to parse retry time:', parseErr);
+      }
+      return res.status(429).json({ error: retryMessage });
     }
 
     res.status(500).json({ error: 'Internal server error during skin analysis.' });

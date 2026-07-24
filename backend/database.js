@@ -6,7 +6,7 @@ const db = new sqlite3.Database(dbFile, (err) => {
   if (err) {
     console.error('Database connection error:', err.message);
   } else {
-    console.log('Connected to local SQLite database (`dermai.db`).');
+    console.log('Connected to local SQLite database.');
   }
 });
 
