@@ -133,14 +133,13 @@ async function analyzeImage() {
   loadingState.style.display = 'block';
   resultsDiv.style.display = 'none';
 
-  // 1. Disable the Reset / Start Over button
+  // 1. Lock out reset button & header tabs during loading
   if (resetBtn) {
     resetBtn.disabled = true;
     resetBtn.style.opacity = '0.5';
     resetBtn.style.cursor = 'not-allowed';
   }
 
-  // 2. Disable all header navigation links (Home and Scan History)
   const navLinks = document.querySelectorAll('header nav a');
   navLinks.forEach(link => {
     link.style.pointerEvents = 'none';
@@ -165,22 +164,20 @@ async function analyzeImage() {
     loadingState.style.display = 'none';
     analyzeBtn.disabled = false;
     analyzeBtn.style.display = 'block';
-    
-    // Re-enable reset button on error
+
+    alert(err.message || 'Analysis failed. Please try again with a clearer face photo.');
+    console.error(err);
+  } finally {
+    // 2. ALWAYS unlock navigation and reset controls when finished (success or failure)
     if (resetBtn) {
       resetBtn.disabled = false;
       resetBtn.style.opacity = '1';
       resetBtn.style.cursor = 'pointer';
     }
-
-    // Re-enable navigation links on error
     navLinks.forEach(link => {
       link.style.pointerEvents = 'auto';
       link.style.opacity = '1';
     });
-
-    alert(err.message || 'Analysis failed. Please try again with a clearer face photo.');
-    console.error(err);
   }
 }
 
