@@ -51,9 +51,10 @@
     Take a photo with your camera
   </button>
 
-  <div id="camera-container">
+  <div id="camera-container" style="display: none; margin-bottom: 1.5rem; border-radius: var(--radius); overflow: hidden; background: #000; position: relative;">
     <video id="video" autoplay playsinline></video>
-    <button class="capture-btn" id="captureBtn" title="Capture"></button>
+    <button type="button" id="cancelCamBtn" style="position: absolute; top: 1rem; right: 1rem; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50px; padding: 0.4rem 0.8rem; font-size: 0.75rem; cursor: pointer;">✕ Close Camera</button>
+    <button type="button" id="captureBtn" class="capture-btn"></button>
   </div>
 
   <canvas id="canvas"></canvas>

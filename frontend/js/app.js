@@ -33,9 +33,13 @@ function loadPreview(file) {
   reader.onload = e => {
     capturedImage = e.target.result;
     previewImg.src = capturedImage;
+    
+    // Explicitly hide upload zone, camera stream box, and buttons
     uploadZone.style.display = 'none';
     camBtn.style.display = 'none';
     document.querySelector('.or-divider').style.display = 'none';
+    if (cameraContainer) cameraContainer.style.display = 'none'; // Ensure camera box disappears
+    
     previewContainer.style.display = 'block';
     analyzeBtn.style.display = 'block';
     stopCamera();
@@ -43,8 +47,15 @@ function loadPreview(file) {
   reader.readAsDataURL(file);
 }
 
+const cancelCamBtn = document.getElementById('cancelCamBtn');
+
+// When user clicks "Take a photo with camera"
 camBtn.addEventListener('click', async () => {
   try {
+    uploadZone.style.display = 'none';
+    camBtn.style.display = 'none';
+    document.querySelector('.or-divider').style.display = 'none';
+
     stream = await navigator.mediaDevices.getUserMedia({ 
       video: { 
         facingMode: 'user',
@@ -55,12 +66,27 @@ camBtn.addEventListener('click', async () => {
     });
     video.srcObject = stream;
     cameraContainer.style.display = 'block';
-    camBtn.style.display = 'none';
-    document.querySelector('.or-divider').style.display = 'none';
-  } catch {
+  } catch (err) {
+    console.error(err);
     alert('Unable to access camera. Please upload a photo instead.');
+    resetCameraView();
   }
 });
+
+// When user changes their mind and clicks "Close Camera" to upload instead
+if (cancelCamBtn) {
+  cancelCamBtn.addEventListener('click', () => {
+    stopCamera();
+    resetCameraView();
+  });
+}
+
+function resetCameraView() {
+  if (cameraContainer) cameraContainer.style.display = 'none';
+  uploadZone.style.display = 'block';
+  camBtn.style.display = 'flex';
+  document.querySelector('.or-divider').style.display = 'flex';
+}
 
 captureBtn.addEventListener('click', () => {
   canvas.width = video.videoWidth;
@@ -87,12 +113,15 @@ resetBtn.addEventListener('click', () => {
   resultsDiv.style.display = 'none';
   resultsDiv.innerHTML = '';
   loadingState.style.display = 'none';
+  
+  // Restore all initial upload and camera triggers
   uploadZone.style.display = 'block';
   camBtn.style.display = 'flex';
   document.querySelector('.or-divider').style.display = 'flex';
+  
   fileInput.value = '';
   previewImg.src = '';
-  cameraContainer.style.display = 'none';
+  if (cameraContainer) cameraContainer.style.display = 'none'; // Force hide camera container
   stopCamera();
 });
 
