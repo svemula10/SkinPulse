@@ -108,6 +108,14 @@ Return exactly this structure:
     res.json(analysisJson);
   } catch (err) {
     console.error('Analysis error:', err);
+
+    // Rate limit error handling (HTTP 429)
+    if (err.status === 429 || (err.message && err.message.toLowerCase().includes('rate limit'))) {
+      return res.status(429).json({ 
+        error: 'Rate limit reached. Please wait a moment before trying another scan.' 
+      });
+    }
+
     res.status(500).json({ error: 'Internal server error during skin analysis.' });
   }
 });
