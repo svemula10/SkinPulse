@@ -161,11 +161,37 @@ function viewScanReport(index) {
     <div class="section-title"><div class="dot"></div>Lifestyle tips</div>
     <div class="tips-section"><ul>${tips}</ul></div>
     ` : ''}
+
+    <button onclick="downloadArchivedPDFReport()" class="new-scan-btn" style="background:var(--sage); color:white; margin-top: 1.5rem; margin-bottom: 10px;">
+      ↓ &nbsp;Download PDF Report
+    </button>
   `;
 
   reportContainer.style.display = 'block';
   reportContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
+// Handler for downloading the archived report as a PDF
+window.downloadArchivedPDFReport = function() {
+  const element = document.getElementById('reportContent');
+  if (!element) {
+    alert('Report content not found.');
+    return;
+  }
+
+  const opt = {
+    margin: 0.5,
+    filename: 'SkinPulse_Archived_Report.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+  };
+
+  html2pdf().from(element).set(opt).save().catch(err => {
+    console.error('PDF generation error:', err);
+    alert('Failed to generate PDF report.');
+  });
+};
 
 function closeReport() {
   document.getElementById('reportContainer').style.display = 'none';
