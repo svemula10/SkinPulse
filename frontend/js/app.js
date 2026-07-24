@@ -104,7 +104,14 @@ async function analyzeImage() {
   loadingState.style.display = 'block';
   resultsDiv.style.display = 'none';
 
-  // Lock out header navigation links during analysis to prevent premature page switching
+  // 1. Disable the Reset / Start Over button
+  if (resetBtn) {
+    resetBtn.disabled = true;
+    resetBtn.style.opacity = '0.5';
+    resetBtn.style.cursor = 'not-allowed';
+  }
+
+  // 2. Disable all header navigation links (Home and Scan History)
   const navLinks = document.querySelectorAll('header nav a');
   navLinks.forEach(link => {
     link.style.pointerEvents = 'none';
@@ -130,7 +137,14 @@ async function analyzeImage() {
     analyzeBtn.disabled = false;
     analyzeBtn.style.display = 'block';
     
-    // Re-enable navigation if an error occurs
+    // Re-enable reset button on error
+    if (resetBtn) {
+      resetBtn.disabled = false;
+      resetBtn.style.opacity = '1';
+      resetBtn.style.cursor = 'pointer';
+    }
+
+    // Re-enable navigation links on error
     navLinks.forEach(link => {
       link.style.pointerEvents = 'auto';
       link.style.opacity = '1';
