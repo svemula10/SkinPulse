@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DermAI — Scan History Dashboard</title>
+<title>DermAI — Scan History</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -14,8 +13,8 @@
   <div class="logo-dot">
     <svg viewBox="0 0 24 24"><path d="M12 2C8 2 5 5.5 5 9c0 5 7 13 7 13s7-8 7-13c0-3.5-3-7-7-7zm0 9a2 2 0 110-4 2 2 0 010 4z"/></svg>
   </div>
-  <h1>DermAI Dashboard</h1>
-  <span>Scan History</span>
+  <h1>DermAI History</h1>
+  <span>Past Scans</span>
   <nav style="margin-left: auto;">
     <a href="index.html" style="font-size: 0.85rem; color: var(--sage); text-decoration: none; font-weight: 500;">← New Analysis</a>
   </nav>
@@ -23,18 +22,18 @@
 
 <main style="max-width: 800px;">
   <div class="hero" style="margin-bottom: 2rem;">
-    <h2>Your skin progress, <em>tracked over time</em></h2>
-    <p>Review past analyses and monitor your health score trajectory.</p>
+    <h2>Your scan archive, <em>all in one place</em></h2>
+    <p>Switch between different past reports (yours, family members, etc.) just like chat threads.</p>
   </div>
 
-  <div style="background: var(--card); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 2rem;">
-    <h3 style="font-family: 'DM Serif Display', serif; font-size: 1.2rem; margin-bottom: 1rem;">Overall Score Progression</h3>
-    <canvas id="progressChart" style="max-height: 250px;"></canvas>
-  </div>
-
-  <div class="section-title"><div class="dot"></div>Past Scan History</div>
+  <div class="section-title"><div class="dot"></div>Saved Scan Sessions</div>
   <div id="scansList" style="display: flex; flex-direction: column; gap: 12px;">
-    <p style="color: var(--muted); text-align: center; padding: 2rem;">Loading scan history...</p>
+    <p style="color: var(--muted); text-align: center; padding: 2rem;">Loading scan archive...</p>
+  </div>
+
+  <div id="reportContainer" style="display: none; margin-top: 2rem; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem;">
+    <button onclick="closeReport()" class="reset-btn" style="margin-bottom: 1rem;">← Back to list</button>
+    <div id="reportContent"></div>
   </div>
 </main>
 
