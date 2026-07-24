@@ -80,8 +80,10 @@ Return exactly this structure:
 
     const rawText = analysisCompletion.choices?.[0]?.message?.content || '';
     
-    // Clean markdown wrappers and isolate only the JSON curly brace block
+    // Clean markdown code blocks
     let cleanText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+    
+    // Isolate only the pure JSON object between the first '{' and the last '}'
     const firstBrace = cleanText.indexOf('{');
     const lastBrace = cleanText.lastIndexOf('}');
     
