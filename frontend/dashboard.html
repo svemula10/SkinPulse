@@ -26,7 +26,15 @@
     <p>Switch between different past reports (yours, family members, etc.) just like chat threads.</p>
   </div>
 
-  <div class="section-title"><div class="dot"></div>Saved Scan Sessions</div>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <div class="section-title" style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">
+      <div class="dot"></div>Saved Scan Sessions
+    </div>
+    <button id="deleteAllBtn" class="new-scan-btn" style="width: auto; padding: 0.4rem 0.8rem; border-color: #c46b6b; color: #c46b6b; font-size: 0.75rem;">
+      🗑 Clear All History
+    </button>
+  </div>
+
   <div id="scansList" style="display: flex; flex-direction: column; gap: 12px;">
     <p style="color: var(--muted); text-align: center; padding: 2rem;">Loading scan archive...</p>
   </div>

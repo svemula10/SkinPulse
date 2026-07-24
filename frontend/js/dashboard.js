@@ -1,41 +1,86 @@
 let allScans = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
+  await loadHistory();
+});
+
+async function loadHistory() {
+  const listContainer = document.getElementById('scansList');
+  const deleteAllBtn = document.getElementById('deleteAllBtn');
+
   try {
     const res = await fetch('http://localhost:5000/api/scans');
-    allScans = await res.json();
+    const data = await res.json();
+    allScans = Array.isArray(data) ? data : [];
 
-    const listContainer = document.getElementById('scansList');
     if (!allScans.length) {
       listContainer.innerHTML = `<p style="color: var(--muted); text-align: center; padding: 2rem;">No past scans found yet. Try completing an analysis!</p>`;
       return;
     }
 
-    // Render clickable session cards (like chat threads)
+    // Render scan archive cards with View, Delete, and chat-thread style click handlers
     listContainer.innerHTML = allScans.map((scan, index) => `
-      <div onclick="viewScanReport(${index})" style="background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--sage)'" onmouseout="this.style.borderColor='var(--border)'">
-        <div>
+      <div style="background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--sage)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div onclick="viewScanReport(${index})" style="flex: 1; cursor: pointer;">
           <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 4px;">Scan Date: ${new Date(scan.timestamp).toLocaleString()}</div>
           <div style="font-weight: 500; font-size: 1rem; color: var(--text);">Skin Type: ${scan.skin_type}</div>
         </div>
         <div style="display: flex; align-items: center; gap: 1.5rem;">
-          <div style="text-align: right;">
+          <div onclick="viewScanReport(${index})" style="text-align: right; cursor: pointer;">
             <span style="font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: var(--sage);">${scan.overall_score}</span>
             <div style="font-size: 0.65rem; color: var(--muted); text-transform: uppercase;">Score</div>
           </div>
-          <span style="font-size: 0.85rem; color: var(--sage); font-weight: 500;">View Report →</span>
+          <div style="display: flex; gap: 8px;">
+            <button onclick="viewScanReport(${index})" class="new-scan-btn" style="width: auto; padding: 0.4rem 0.8rem; font-size: 0.8rem;">View</button>
+            <button onclick="deleteScan(${scan.id})" class="new-scan-btn" style="width: auto; padding: 0.4rem 0.8rem; font-size: 0.8rem; border-color: #c46b6b; color: #c46b6b;">Delete</button>
+          </div>
         </div>
       </div>
     `).join('');
 
   } catch (err) {
     console.error('Failed to load dashboard data:', err);
-    document.getElementById('scansList').innerHTML = `<p style="color: #c46b6b; text-align: center;">Failed to connect to backend server.</p>`;
+    listContainer.innerHTML = `<p style="color: #c46b6b; text-align: center; padding: 2rem;">Failed to connect to backend server.</p>`;
   }
-});
+
+  // Wire up Clear All button event listener safely
+  if (deleteAllBtn) {
+    deleteAllBtn.onclick = async () => {
+      if (!confirm('Are you sure you want to clear all past scan history?')) return;
+      try {
+        const res = await fetch('http://localhost:5000/api/scans', { method: 'DELETE' });
+        if (res.ok) {
+          closeReport();
+          loadHistory();
+        } else {
+          alert('Failed to clear history.');
+        }
+      } catch (err) {
+        alert('Error connecting to backend server.');
+      }
+    };
+  }
+}
+
+// Handle individual scan deletion
+window.deleteScan = async function(id) {
+  if (!confirm('Are you sure you want to delete this specific scan?')) return;
+  try {
+    const res = await fetch(`http://localhost:5000/api/scans/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      closeReport();
+      loadHistory();
+    } else {
+      alert('Failed to delete scan.');
+    }
+  } catch (err) {
+    alert('Error connecting to backend server.');
+  }
+};
 
 function viewScanReport(index) {
   const scan = allScans[index];
+  if (!scan) return;
   const a = scan.analysis_data;
 
   document.getElementById('scansList').style.display = 'none';

@@ -113,6 +113,27 @@ router.get('/scans', (req, res) => {
   });
 });
 
+// DELETE /api/scans - Delete all historical scans
+router.delete('/scans', (req, res) => {
+  db.run(`DELETE FROM scans`, [], function(err) {
+    if (err) {
+      console.error('Failed to delete all scans:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ message: 'All scan history deleted successfully.' });
+  });
+});
 
+// DELETE /api/scans/:id - Delete a single specific scan by ID
+router.delete('/scans/:id', (req, res) => {
+  const scanId = req.params.id;
+  db.run(`DELETE FROM scans WHERE id = ?`, [scanId], function(err) {
+    if (err) {
+      console.error('Failed to delete scan:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ message: `Scan ${scanId} deleted successfully.` });
+  });
+});
 
 module.exports = router;
