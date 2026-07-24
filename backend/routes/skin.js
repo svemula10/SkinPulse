@@ -41,7 +41,7 @@ router.post('/analyze', async (req, res) => {
 
     const answer = valCompletion.choices?.[0]?.message?.content?.trim().toUpperCase() || '';
     
-    // Single, flexible check — ensures minor model chatter or webcam variations pass successfully
+    // Flexible check — ensures minor model chatter or webcam variations pass successfully
     if (!answer.includes('YES')) {
       return res.status(422).json({ error: 'Please upload a real photo of a face. Illustrations and icons are not accepted.' });
     }
@@ -79,9 +79,18 @@ Return exactly this structure:
     });
 
     const rawText = analysisCompletion.choices?.[0]?.message?.content || '';
-    const cleanText = rawText.replace(/```json|```/g, '').trim();
-    const match = cleanText.match(/\{[\s\S]*\}/);
-    const analysisJson = match ? JSON.parse(match[0]) : null;
+    
+    // Clean markdown wrappers and isolate only the JSON curly brace block
+    let cleanText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+    const firstBrace = cleanText.indexOf('{');
+    const lastBrace = cleanText.lastIndexOf('}');
+    
+    if (firstBrace === -1 || lastBrace === -1) {
+      throw new Error('No valid JSON object found in Groq response.');
+    }
+    
+    const jsonString = cleanText.substring(firstBrace, lastBrace + 1);
+    const analysisJson = JSON.parse(jsonString);
 
     if (!analysisJson) throw new Error('Failed to parse JSON structure from Groq response.');
 

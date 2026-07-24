@@ -18,7 +18,7 @@ async function loadHistory() {
       return;
     }
 
-    // Render scan archive cards with View, Delete, and chat-thread style click handlers
+    // Render original chat-thread style cards with green accenting, View, and Delete buttons
     listContainer.innerHTML = allScans.map((scan, index) => `
       <div style="background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--sage)'" onmouseout="this.style.borderColor='var(--border)'">
         <div onclick="viewScanReport(${index})" style="flex: 1; cursor: pointer;">
