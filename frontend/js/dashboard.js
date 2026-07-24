@@ -161,10 +161,6 @@ function viewScanReport(index) {
     <div class="section-title"><div class="dot"></div>Lifestyle tips</div>
     <div class="tips-section"><ul>${tips}</ul></div>
     ` : ''}
-
-    <button onclick="downloadArchivedPDFReport()" class="new-scan-btn" style="background:var(--sage); color:white; margin-top: 1.5rem; margin-bottom: 10px;">
-      ↓ &nbsp;Download PDF Report
-    </button>
   `;
 
   reportContainer.style.display = 'block';
@@ -179,15 +175,28 @@ window.downloadArchivedPDFReport = function() {
     return;
   }
 
+  // Clone or apply inline PDF-friendly padding/background to guarantee clean rendering
+  element.style.background = '#ffffff';
+  element.style.padding = '20px';
+  element.style.color = '#1a1a1a';
+
   const opt = {
-    margin: 0.5,
-    filename: 'SkinPulse_Archived_Report.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    margin:       [0.4, 0.4, 0.4, 0.4],
+    filename:     'SkinPulse_Professional_Dermatology_Report.pdf',
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { 
+      scale: 2, 
+      useCORS: true, 
+      letterRendering: true,
+      scrollY: 0 
+    },
+    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
   };
 
-  html2pdf().from(element).set(opt).save().catch(err => {
+  html2pdf().from(element).set(opt).save().then(() => {
+    // Reset padding/styles after download completes
+    element.style.padding = '';
+  }).catch(err => {
     console.error('PDF generation error:', err);
     alert('Failed to generate PDF report.');
   });

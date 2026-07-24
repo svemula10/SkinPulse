@@ -73,9 +73,22 @@
     <p class="loading-tip">Looking for texture, tone, and skin concerns</p>
   </div>
 
-  <div id="results"></div>
+  <div id="results" style="display: none; margin-top: 2rem;">
+  
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <button id="resetBtn" class="reset-btn">← Analyze Another Photo</button>
+    
+    <button onclick="downloadPDFReport()" class="new-scan-btn" style="background: var(--sage); color: white; width: auto; padding: 0.4rem 1rem; font-size: 0.8rem; margin: 0;">
+      ↓ Download PDF Report
+    </button>
+  </div>
 
-  <p class="disclaimer">DermAI is for informational purposes only and is not a substitute for professional medical or dermatological advice.</p>
+  <div id="reportContent" style="background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem;">
+    </div>
+
+</div>
+
+  <p class="disclaimer">SkinPulse is for informational purposes only and is not a substitute for professional medical or dermatological advice.</p>
 </main>
 
 <script src="js/app.js"></script>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DermAI — Scan History</title>
+  <title>SkinPulse — Scan History</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   
@@ -15,7 +15,7 @@
   <div class="logo-dot">
     <svg viewBox="0 0 24 24"><path d="M12 2C8 2 5 5.5 5 9c0 5 7 13 7 13s7-8 7-13c0-3.5-3-7-7-7zm0 9a2 2 0 110-4 2 2 0 010 4z"/></svg>
   </div>
-  <h1>DermAI History</h1>
+  <h1>SkinPulse History</h1>
   <span>Past Scans</span>
   <nav style="margin-left: auto; display: flex; gap: 15px; align-items: center;">
     <a href="index.html" style="font-size: 0.85rem; color: var(--text); text-decoration: none; font-weight: 500;">Home</a>
@@ -43,8 +43,15 @@
   </div>
 
   <div id="reportContainer" style="display: none; margin-top: 2rem; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem;">
-    <button onclick="closeReport()" class="reset-btn" style="margin-bottom: 1rem;">← Back to list</button>
-    <div id="reportContent"></div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <button onclick="closeReport()" class="reset-btn">← Back to list</button>
+      
+      <button onclick="downloadArchivedPDFReport()" class="new-scan-btn" style="background: var(--sage); color: white; width: auto; padding: 0.4rem 1rem; font-size: 0.8rem; margin: 0;">
+        ↓ Download PDF Report
+      </button>
+    </div>
+
+    <div id="reportContent" style="background: var(--card); padding: 10px;"></div>
   </div>
 </main>
 
