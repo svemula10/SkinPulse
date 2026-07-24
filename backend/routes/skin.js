@@ -27,7 +27,10 @@ router.post('/analyze', async (req, res) => {
         {
           role: 'user',
           content: [
-            { type: 'text', text: 'Does this image show a real photograph of a real human face (not a cartoon, silhouette, illustration, drawing, or icon)? Reply only with YES or NO.' },
+            { 
+              type: 'text', 
+              text: 'Look at this image. Is there a human face present, even if lighting or quality is imperfect? Answer with YES if a face is visible, or NO if it is completely empty, an icon, or a cartoon.' 
+            },
             { type: 'image_url', image_url: { url: imageUrl } }
           ]
         }
@@ -38,7 +41,8 @@ router.post('/analyze', async (req, res) => {
 
     const answer = valCompletion.choices?.[0]?.message?.content?.trim().toUpperCase() || '';
     
-    if (!answer.startsWith('YES')) {
+    // Single, flexible check — ensures minor model chatter or webcam variations pass successfully
+    if (!answer.includes('YES')) {
       return res.status(422).json({ error: 'Please upload a real photo of a face. Illustrations and icons are not accepted.' });
     }
 
@@ -108,5 +112,7 @@ router.get('/scans', (req, res) => {
     res.json(parsedRows);
   });
 });
+
+
 
 module.exports = router;
