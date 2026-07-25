@@ -47,10 +47,13 @@ function loadPreview(file) {
   reader.readAsDataURL(file);
 }
 
+const disclaimerText = document.getElementById('disclaimerText');
+
 camBtn.addEventListener('click', async () => {
   try {
     uploadZone.style.display = 'none';
     camBtn.style.display = 'none';
+    if (disclaimerText) disclaimerText.style.display = 'none'; // Hide disclaimer when camera opens
     document.querySelector('.or-divider').style.display = 'none';
 
     stream = await navigator.mediaDevices.getUserMedia({ 
@@ -75,6 +78,14 @@ if (cancelCamBtn) {
     stopCamera();
     resetCameraView();
   });
+}
+
+function resetCameraView() {
+  if (cameraContainer) cameraContainer.style.display = 'none';
+  uploadZone.style.display = 'block';
+  camBtn.style.display = 'flex';
+  if (disclaimerText) disclaimerText.style.display = 'block'; // Restore disclaimer when camera closes
+  document.querySelector('.or-divider').style.display = 'flex';
 }
 
 function resetCameraView() {

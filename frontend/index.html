@@ -25,7 +25,7 @@
 
   <main>
     <div class="hero">
-      <h2>Understand your skin, <em>inside and out</em></h2>
+      <h2>Your skin, <em>understood</em></h2>
       <p>Upload a face photo or take a live snapshot for a detailed, AI-driven dermatological evaluation.</p>
     </div>
 
@@ -51,6 +51,10 @@
       <button type="button" id="captureBtn" class="capture-btn" title="Capture photo"></button>
     </div>
 
+    <p style="font-size: 0.72rem; color: var(--muted); margin-top: 1rem; margin-bottom: 1.5rem; text-align: center;">
+      SkinPulse is for informational purposes only and does not substitute professional medical or dermatological advice.
+    </p>
+
     <div id="preview-container">
       <div style="position: relative;">
         <img id="previewImg" alt="Preview">
@@ -75,7 +79,6 @@
   </main>
 
   <div id="pdfReportTemplate" style="display: none; background: #ffffff; color: #1a1a1a; padding: 40px; font-family: 'DM Sans', sans-serif; max-width: 700px; margin: 0 auto;">
-  
     <div style="border-bottom: 2px solid #4a7c5f; padding-bottom: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; page-break-inside: avoid;">
       <div>
         <h1 style="font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: #1a1a1a; margin: 0;">SkinPulse Clinical Assessment</h1>
@@ -88,14 +91,6 @@
       </div>
 
     <div style="margin-top: 40px; border-top: 1px solid #ddd; padding-top: 15px; font-size: 0.65rem; color: #666; text-align: center; page-break-inside: avoid;">
-      SkinPulse AI Diagnostic Report. Generated for informational purposes and routine optimization; does not substitute professional medical advice.
-    </div>
-  </div>
-
-    <div id="pdfReportInnerContent">
-      </div>
-
-    <div style="margin-top: 40px; border-top: 1px solid #ddd; padding-top: 12px; font-size: 0.65rem; color: #666; text-align: center;">
       SkinPulse AI Diagnostic Report. Generated for informational purposes and routine optimization; does not substitute professional medical advice.
     </div>
   </div>
