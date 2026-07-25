@@ -189,10 +189,16 @@ window.downloadPDFReport = function() {
   element.style.display = 'block';
 
   const opt = {
-    margin:       [0.4, 0.4, 0.4, 0.4],
+    margin:       [0.5, 0.5, 0.5, 0.5],
     filename:     'SkinPulse_Clinical_Report.pdf',
     image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+    html2canvas:  { 
+      scale: 2, 
+      useCORS: true, 
+      letterRendering: true,
+      scrollY: 0,
+      windowWidth: 800
+    },
     jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
   };
 
@@ -301,7 +307,7 @@ function renderResults(a) {
 
   if (pdfInner) {
     pdfInner.innerHTML = `
-      <div class="results-header" style="margin-bottom: 1.5rem;">
+      <div class="results-header" style="margin-bottom: 2rem; page-break-inside: avoid;">
         <div>
           <h2 style="font-family: 'DM Serif Display', serif; font-size: 1.4rem; margin: 0;">Skin Health Evaluation</h2>
           <p style="font-size:0.85rem; color:#555; margin: 4px 0 0 0;">
@@ -315,7 +321,7 @@ function renderResults(a) {
       </div>
 
       ${a.scoreBreakdown ? `
-      <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:1.5rem;">
+      <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:2rem; page-break-inside: avoid;">
         ${Object.entries(a.scoreBreakdown).map(([key, val]) => `
           <div style="background:#f5f0e8; border-radius:10px; padding:0.75rem;">
             <div style="font-size:0.7rem; color:#666; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px;">${key}: ${val}/100</div>
@@ -326,23 +332,33 @@ function renderResults(a) {
         `).join('')}
       </div>` : ''}
 
-      <h3 style="font-family: 'DM Serif Display', serif; font-size: 1.1rem; border-bottom: 1px solid #ddd; padding-bottom: 4px; margin-top: 1.5rem;">Identified Concerns</h3>
-      <div class="issues-grid" style="margin-bottom: 1.5rem;">${issueCards}</div>
+      <div style="page-break-inside: avoid;">
+        <h3 style="font-family: 'DM Serif Display', serif; font-size: 1.1rem; border-bottom: 1px solid #ddd; padding-bottom: 4px; margin-top: 1.5rem;">Identified Concerns</h3>
+        <div class="issues-grid" style="margin-bottom: 1.5rem;">${issueCards}</div>
+      </div>
 
-      <h3 style="font-family: 'DM Serif Display', serif; font-size: 1.1rem; border-bottom: 1px solid #ddd; padding-bottom: 4px;">Morning Routine</h3>
-      <div style="margin-bottom: 1rem;">${buildSteps(a.morningRoutine)}</div>
+      <div style="page-break-inside: avoid;">
+        <h3 style="font-family: 'DM Serif Display', serif; font-size: 1.1rem; border-bottom: 1px solid #ddd; padding-bottom: 4px;">Morning Routine</h3>
+        <div style="margin-bottom: 1.5rem;">${buildSteps(a.morningRoutine)}</div>
+      </div>
 
-      <h3 style="font-family: 'DM Serif Display', serif; font-size: 1.1rem; border-bottom: 1px solid #ddd; padding-bottom: 4px;">Evening Routine</h3>
-      <div style="margin-bottom: 1rem;">${buildSteps(a.eveningRoutine)}</div>
+      <div style="page-break-inside: avoid;">
+        <h3 style="font-family: 'DM Serif Display', serif; font-size: 1.1rem; border-bottom: 1px solid #ddd; padding-bottom: 4px;">Evening Routine</h3>
+        <div style="margin-bottom: 1.5rem;">${buildSteps(a.eveningRoutine)}</div>
+      </div>
 
       ${(a.weeklyTreatments || []).length ? `
-        <h3 style="font-family: 'DM Serif Display', serif; font-size: 1.1rem; border-bottom: 1px solid #ddd; padding-bottom: 4px;">Weekly Treatments</h3>
-        <div style="margin-bottom: 1rem;">${buildSteps(a.weeklyTreatments)}</div>
+        <div style="page-break-inside: avoid;">
+          <h3 style="font-family: 'DM Serif Display', serif; font-size: 1.1rem; border-bottom: 1px solid #ddd; padding-bottom: 4px;">Weekly Treatments</h3>
+          <div style="margin-bottom: 1.5rem;">${buildSteps(a.weeklyTreatments)}</div>
+        </div>
       ` : ''}
 
       ${tips ? `
-        <h3 style="font-family: 'DM Serif Display', serif; font-size: 1.1rem; border-bottom: 1px solid #ddd; padding-bottom: 4px;">Lifestyle Tips</h3>
-        <ul style="padding-left: 20px; font-size: 0.85rem; color: #333;">${tips}</ul>
+        <div style="page-break-inside: avoid;">
+          <h3 style="font-family: 'DM Serif Display', serif; font-size: 1.1rem; border-bottom: 1px solid #ddd; padding-bottom: 4px;">Lifestyle Tips</h3>
+          <ul style="padding-left: 20px; font-size: 0.85rem; color: #333;">${tips}</ul>
+        </div>
       ` : ''}
     `;
   }
