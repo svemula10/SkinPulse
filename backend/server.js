@@ -11,6 +11,7 @@ app.use(express.json({ limit: '10mb' }));
 
 // Mount API routes
 app.use('/api', skinRoutes);
+app.use('/api/environment', require('./routes/environment'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
