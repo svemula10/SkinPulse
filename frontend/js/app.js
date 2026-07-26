@@ -197,9 +197,9 @@ window.downloadPDFReport = function() {
     return;
   }
 
-  // Temporarily hide the download button from the PDF capture
-  const downloadBtn = element.querySelector('button');
-  if (downloadBtn) downloadBtn.style.display = 'none';
+  // Hide both the action bar container and the download button during capture
+  const actionBar = element.querySelector('div[style*="display: flex; justify-content: space-between"]');
+  if (actionBar) actionBar.style.display = 'none';
 
   const originalBackground = element.style.background;
   const originalPadding = element.style.padding;
@@ -223,13 +223,13 @@ window.downloadPDFReport = function() {
   };
 
   html2pdf().from(element).set(opt).save().then(() => {
-    if (downloadBtn) downloadBtn.style.display = 'block';
+    if (actionBar) actionBar.style.display = 'flex';
     element.style.background = originalBackground;
     element.style.padding = originalPadding;
     element.style.color = originalColor;
   }).catch(err => {
     console.error('PDF generation error:', err);
-    if (downloadBtn) downloadBtn.style.display = 'block';
+    if (actionBar) actionBar.style.display = 'flex';
     element.style.background = originalBackground;
     element.style.padding = originalPadding;
     element.style.color = originalColor;
