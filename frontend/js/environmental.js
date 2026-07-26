@@ -129,27 +129,40 @@ async function handleEnvironmentalAnalysis() {
     const weather = data.weather || { uvIndex: 5, uvLevel: 'Moderate', humidity: 64, temp: 71 };
 
     resultsDiv.innerHTML = `
-      <div style="background: var(--warm); border-radius: 12px; padding: 1.5rem; margin-top: 1rem;">
-        <h3 style="margin-bottom: 0.2rem; color: var(--text); font-family: 'DM Serif Display', serif;">Microclimate Skin Adaptation Plan</h3>
-        <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 1.25rem;">Target Profile: <strong>${escapeHtml(scan.name)}</strong> (${escapeHtml(scan.skin_type)}) | Region: <em>${escapeHtml(data.location)}</em></p>
+      <div style="background: var(--warm); border-radius: 12px; padding: 1.75rem; margin-top: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+        <h3 style="margin-bottom: 0.2rem; color: var(--text); font-family: 'DM Serif Display', serif; font-size: 1.3rem;">Comprehensive Microclimate Clinical Report</h3>
+        <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 1.25rem;">Target Profile: <strong>${escapeHtml(scan.name)}</strong> (${escapeHtml(scan.skin_type)}) | Geolocation: <em>${escapeHtml(data.location)}</em></p>
         
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.5rem;">
-          <div style="background: var(--card); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--border); text-align: center;">
-            <div style="font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">UV Index</div>
-            <div style="font-size: 1.2rem; font-weight: 600; color: var(--sage);">${weather.uvIndex} <span style="font-size:0.75rem; font-weight:normal;">(${weather.uvLevel})</span></div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 1.5rem;">
+          <div style="background: var(--card); padding: 1rem; border-radius: 10px; border: 1px solid var(--border); text-align: center;">
+            <div style="font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">UV Index</div>
+            <div style="font-size: 1.3rem; font-weight: 600; color: var(--sage);">${weather.uvIndex} <span style="font-size:0.75rem; font-weight:normal;">(${weather.uvLevel})</span></div>
           </div>
-          <div style="background: var(--card); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--border); text-align: center;">
-            <div style="font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Humidity</div>
-            <div style="font-size: 1.2rem; font-weight: 600; color: var(--text);">${weather.humidity}%</div>
+          <div style="background: var(--card); padding: 1rem; border-radius: 10px; border: 1px solid var(--border); text-align: center;">
+            <div style="font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Humidity</div>
+            <div style="font-size: 1.3rem; font-weight: 600; color: var(--text);">${weather.humidity}%</div>
           </div>
-          <div style="background: var(--card); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--border); text-align: center;">
-            <div style="font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Temperature</div>
-            <div style="font-size: 1.2rem; font-weight: 600; color: var(--text);">${weather.temp}°F</div>
+          <div style="background: var(--card); padding: 1rem; border-radius: 10px; border: 1px solid var(--border); text-align: center;">
+            <div style="font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Temperature</div>
+            <div style="font-size: 1.3rem; font-weight: 600; color: var(--text);">${weather.temp}°F</div>
           </div>
         </div>
 
-        <div style="background: var(--card); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border); font-size: 0.9rem; line-height: 1.6; color: var(--text); margin-bottom: 1rem;">
-          ${data.advice}
+        <div style="background: var(--card); padding: 1.25rem; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 1rem;">
+          <h4 style="font-size: 0.95rem; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">🌍 General Atmospheric Impact</h4>
+          <p style="font-size: 0.88rem; line-height: 1.6; color: var(--muted); margin: 0;">${data.generalEducation}</p>
+        </div>
+
+        <div style="background: var(--card); padding: 1.25rem; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 1rem;">
+          <h4 style="font-size: 0.95rem; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">🔍 Specific Profile Sensitivity Analysis</h4>
+          <p style="font-size: 0.88rem; line-height: 1.6; color: var(--muted); margin: 0;">${data.profileVulnerability}</p>
+        </div>
+
+        <div style="background: var(--card); padding: 1.25rem; border-radius: 10px; border: 1px solid var(--border);">
+          <h4 style="font-size: 0.95rem; color: var(--text); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">💡 Targeted Daily Routine Overrides</h4>
+          <ul style="font-size: 0.88rem; line-height: 1.6; color: var(--muted); margin: 0; padding-left: 1.2rem;">
+            ${data.routineOverrides}
+          </ul>
         </div>
       </div>
     `;
