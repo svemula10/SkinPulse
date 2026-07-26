@@ -129,6 +129,16 @@ analyzeBtn.addEventListener('click', analyzeImage);
 
 async function analyzeImage() {
   if (!capturedImage) return;
+
+  const userNameInput = document.getElementById('userName');
+  const userName = userNameInput ? userNameInput.value.trim() : '';
+
+  if (!userName) {
+    alert('Please enter a client or user name before analyzing the skin profile.');
+    if (userNameInput) userNameInput.focus();
+    return;
+  }
+
   analyzeBtn.disabled = true;
   loadingState.style.display = 'block';
   resultsDiv.style.display = 'none';
@@ -151,13 +161,13 @@ async function analyzeImage() {
     const response = await fetch('http://localhost:5000/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: base64Data, mediaType: mediaType })
+      body: JSON.stringify({ image: base64Data, mediaType: mediaType, name: userName })
     });
 
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Analysis failed.');
 
-    renderResults(data);
+    renderResults(data, userName);
   } catch (err) {
     loadingState.style.display = 'none';
     analyzeBtn.disabled = false;
@@ -194,16 +204,16 @@ window.downloadPDFReport = function() {
   element.style.color = '#1a1a1a';
 
   const opt = {
-    margin:       [0.4, 0.4, 0.4, 0.4],
-    filename:     'SkinPulse_Professional_Dermatology_Report.pdf',
-    image:        { type: 'jpeg', quality: 0.98 },
+    margin:      [0.4, 0.4, 0.4, 0.4],
+    filename:    'SkinPulse_Professional_Dermatology_Report.pdf',
+    image:       { type: 'jpeg', quality: 0.98 },
     html2canvas:  { 
       scale: 2, 
       useCORS: true, 
       letterRendering: true,
       scrollY: 0 
     },
-    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    jsPDF:       { unit: 'in', format: 'letter', orientation: 'portrait' }
   };
 
   html2pdf().from(templateWrapper).set(opt).save().then(() => {
@@ -216,7 +226,7 @@ window.downloadPDFReport = function() {
   });
 };
 
-function renderResults(a) {
+function renderResults(a, userName = 'Anonymous') {
   loadingState.style.display = 'none';
   resultsDiv.style.display = 'block';
   resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -244,6 +254,23 @@ function renderResults(a) {
 
   const tips = (a.lifestyleTips || []).map(t => `<li>${t}</li>`).join('');
 
+  const clientInfoBlock = `
+    <div style="background: var(--warm); border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div style="font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 2px;">Client Name</div>
+        <div style="font-size: 1rem; font-weight: 500; color: var(--text);">${escapeHtml(userName)}</div>
+      </div>
+      <div style="text-align: right;">
+        <div style="font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 2px;">Scan Date</div>
+        <div style="font-size: 0.9rem; font-weight: 500; color: var(--text);">${new Date().toLocaleDateString()}</div>
+      </div>
+    </div>
+  `;
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+
   // 1. RENDER NORMAL WEB PAGE VIEW
   resultsDiv.innerHTML = `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
@@ -251,6 +278,8 @@ function renderResults(a) {
         ↓ &nbsp;Download PDF Report
       </button>
     </div>
+
+    ${clientInfoBlock}
 
     <div class="results-header">
       <h2>Your skin<br><span>analysis</span></h2>
@@ -310,6 +339,8 @@ function renderResults(a) {
 
   if (pdfInner) {
     pdfInner.innerHTML = `
+      ${clientInfoBlock}
+
       <div class="results-header">
         <h2>Skin Health Evaluation<br><span>${new Date().toLocaleDateString()}</span></h2>
         <div class="skin-score">

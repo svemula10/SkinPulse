@@ -10,10 +10,12 @@ const anthropic = new Anthropic({
 // 1. ANALYZE ROUTE (With Claude API Prompt Caching)
 router.post('/analyze', async (req, res) => {
   try {
-    const { image, mediaType } = req.body;
+    const { image, mediaType, name } = req.body;
     if (!image || !mediaType) {
       return res.status(400).json({ error: 'Image data and media type are required.' });
     }
+
+    const userName = name && name.trim() !== '' ? name.trim() : 'Anonymous';
 
     // STAGE 1: Image Validation with Prompt Caching
     const valMessage = await anthropic.messages.create({
@@ -133,10 +135,10 @@ router.post('/analyze', async (req, res) => {
     const cleanedJSON = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
     const analysisData = JSON.parse(cleanedJSON);
 
-    // Save scan to SQLite database automatically upon successful analysis
+    // Save scan to SQLite database automatically upon successful analysis including user name
     db.run(
-      `INSERT INTO scans (skin_type, overall_score, analysis_data) VALUES (?, ?, ?)`,
-      [analysisData.skinType, analysisData.overallScore, JSON.stringify(analysisData)],
+      `INSERT INTO scans (name, skin_type, overall_score, analysis_data) VALUES (?, ?, ?, ?)`,
+      [userName, analysisData.skinType, analysisData.overallScore, JSON.stringify(analysisData)],
       function(dbErr) {
         if (dbErr) console.error('Database save error:', dbErr);
       }

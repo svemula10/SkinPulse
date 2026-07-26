@@ -15,12 +15,18 @@ db.serialize(() => {
     CREATE TABLE IF NOT EXISTS scans (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+      name TEXT DEFAULT 'Anonymous',
       overall_score INTEGER,
       skin_type TEXT,
       image_quality TEXT,
       analysis_data TEXT
     )
-  `);
+  `, () => {
+    // Fallback migration in case table already existed without the 'name' column
+    db.run(`ALTER TABLE scans ADD COLUMN name TEXT DEFAULT 'Anonymous'`, (alterErr) => {
+      // Ignore error if column already exists
+    });
+  });
 });
 
 module.exports = db;
