@@ -26,10 +26,10 @@
 
   <main style="max-width: 750px; margin: 2rem auto; padding: 0 1.5rem;">
     <div class="results-header" style="margin-bottom: 1.5rem;">
-      <h2>Climate & UV<br><span>Skin Advisor</span></h2>
+      <h2>Climate & UV <span>Skin Advisor</span></h2>
     </div>
     <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
-      Select a saved profile, then click anywhere on the global map below to evaluate how shifting geographic microclimates impact your skin barrier.
+      Select a saved skin profile, then click anywhere on the interactive map or use your GPS to analyze live microclimate skin risks.
     </p>
 
     <div style="margin-bottom: 1.25rem;">
@@ -44,8 +44,8 @@
         <label style="font-size: 0.8rem; font-weight: 500; color: var(--text);">Click Location on Map or Use GPS</label>
         <button type="button" id="useGpsBtn" style="background: none; border: none; color: var(--sage); font-size: 0.75rem; font-weight: 600; cursor: pointer; padding: 0;">📍 Use My Current Location</button>
       </div>
-      <div id="climateMap" style="width: 100%; height: 300px; border-radius: var(--radius); border: 1px solid var(--border); z-index: 1;"></div>
-      <div id="selectedLocationLabel" style="font-size: 0.75rem; color: var(--muted); margin-top: 6px;">Active Coordinates: None selected (defaults to current GPS/Geolocation)</div>
+      <div id="climateMap" style="width: 100%; height: 320px; border-radius: var(--radius); border: 1px solid var(--border); z-index: 1;"></div>
+      <div id="selectedLocationLabel" style="font-size: 0.75rem; color: var(--muted); margin-top: 6px;">Active Region: None selected</div>
     </div>
 
     <button type="button" id="fetchEnvBtn" class="new-scan-btn" style="background: var(--sage); color: white; width: 100%; padding: 0.75rem; font-size: 0.95rem; margin-bottom: 1.5rem; cursor: pointer; border: none; border-radius: var(--radius);">

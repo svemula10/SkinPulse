@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadProfilesIntoDropdown();
   initInteractiveMap();
 
+  // REMOVED: autoDetectUserLocation() call on startup
+  // The map will now remain clean until the user explicitly clicks or uses GPS.
+
   const fetchEnvBtn = document.getElementById('fetchEnvBtn');
   if (fetchEnvBtn) {
     fetchEnvBtn.addEventListener('click', handleEnvironmentalAnalysis);
@@ -19,7 +22,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function initInteractiveMap() {
-  map = L.map('climateMap').setView([39.8283, -98.5795], 3);
+  // Default world view centered neutrally
+  map = L.map('climateMap').setView([20, 0], 2);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
@@ -41,8 +45,8 @@ function setMapLocation(lat, lng) {
     selectedMarker = L.marker([lat, lng]).addTo(map);
   }
 
-  map.setView([lat, lng], 10);
-  document.getElementById('selectedLocationLabel').innerHTML = `Active Coordinates: <strong>${clickedCoordinates}</strong>`;
+  map.setView([lat, lng], 8);
+  document.getElementById('selectedLocationLabel').innerHTML = `Active Region: <strong>Coordinates (${lat.toFixed(2)}, ${lng.toFixed(2)})</strong>`;
 }
 
 function locateUserOnMap() {
@@ -51,7 +55,7 @@ function locateUserOnMap() {
     return;
   }
 
-  document.getElementById('selectedLocationLabel').innerHTML = `Active Coordinates: <em>Locating GPS position...</em>`;
+  document.getElementById('selectedLocationLabel').innerHTML = `Active Region: <em>Locating GPS position...</em>`;
 
   navigator.geolocation.getCurrentPosition(
     (position) => {
@@ -62,7 +66,7 @@ function locateUserOnMap() {
     (err) => {
       console.error(err);
       alert('Unable to retrieve your location. Please check browser permissions.');
-      document.getElementById('selectedLocationLabel').innerHTML = `Active Coordinates: None selected`;
+      document.getElementById('selectedLocationLabel').innerHTML = `Active Region: None selected`;
     }
   );
 }
@@ -92,16 +96,22 @@ async function handleEnvironmentalAnalysis() {
   const resultsDiv = document.getElementById('envResultsContent');
   const selectedIndex = select.value;
 
+  // Validation: Profile must be selected
   if (selectedIndex === "") {
     alert('Please select a saved skin profile first.');
+    if (select) select.focus();
+    return;
+  }
+
+  // Validation: Location must be explicitly chosen via map or GPS
+  if (!clickedCoordinates) {
+    alert('Please select a location by clicking anywhere on the map or clicking "Use My Current Location".');
     return;
   }
 
   const scan = allScans[selectedIndex];
   resultsDiv.style.display = 'block';
-  resultsDiv.innerHTML = `<p style="color: var(--muted); text-align: center; padding: 1rem;">Querying geospatial microclimate models and synthesizing customized skincare protocols...</p>`;
-
-  const payloadLocation = clickedCoordinates ? clickedCoordinates : 'Default Geolocation';
+  resultsDiv.innerHTML = `<p style="color: var(--muted); text-align: center; padding: 1rem;">Querying live meteorological telemetry for <strong>${clickedCoordinates}</strong> and synthesizing customized skincare protocols...</p>`;
 
   try {
     const res = await fetch('http://localhost:5000/api/environment/advice', {
@@ -110,13 +120,13 @@ async function handleEnvironmentalAnalysis() {
       body: JSON.stringify({
         skinType: scan.skin_type,
         issues: scan.analysis_data.issues || [],
-        location: payloadLocation
+        location: clickedCoordinates
       })
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to fetch advice.');
 
-    const weather = data.weather || { uvIndex: 5, uvLevel: 'Moderate', humidity: 50, temp: 72 };
+    const weather = data.weather || { uvIndex: 5, uvLevel: 'Moderate', humidity: 64, temp: 71 };
 
     resultsDiv.innerHTML = `
       <div style="background: var(--warm); border-radius: 12px; padding: 1.5rem; margin-top: 1rem;">

@@ -2,25 +2,35 @@ const express = require('express');
 const router = express.Router();
 
 router.post('/advice', async (req, res) => {
-  const { skinType, issues, location, targetCity } = req.body;
+  const { skinType, issues, location } = req.body;
 
   try {
-    const activeLocation = targetCity ? targetCity : (location || 'Selected Coordinates');
+    const activeLocation = location || 'Lat: 48.85, Lon: 2.35';
     
-    // Generate telemetry (if latitude/longitude or city is passed, calculate specific attributes)
-    const weatherData = getTelemetryForLocation(activeLocation);
+    const weatherData = await fetchLiveWeather(activeLocation);
 
-    // Dynamic, highly customized prompt mapping skin type & issues to local climate
-    const issueNames = (issues || []).map(i => i.name).join(', ') || 'General sensitivity';
-    
-    // In your actual app, pass this prompt to your Anthropic/Groq client:
+    const issueList = (issues || []).map(i => i.name.toLowerCase());
+    const hasAcne = issueList.some(i => i.includes('acne') || i.includes('breakout') || i.includes('blemish'));
+    const hasDryness = issueList.some(i => i.includes('dry') || i.includes('dehydrat') || i.includes('flake'));
+    const hasPigmentation = issueList.some(i => i.includes('pigment') || i.includes('spot') || i.includes('dark'));
+
+    let tacticalAdvice = "";
+    let routineOverride = "";
+
+    if (weatherData.humidity > 60 && hasAcne) {
+      tacticalAdvice = `High ambient humidity (${weatherData.humidity}%) combined with your profile's breakout tendencies increases sebum oxidation and trapping.`;
+      routineOverride = `<strong>Routine Override:</strong> Incorporate a lightweight salicylic acid (BHA) wash and a gel-based, non-comedogenic hydrator.`;
+    } else if (weatherData.humidity < 40 && hasDryness) {
+      tacticalAdvice = `Low humidity (${weatherData.humidity}%) accelerates transepidermal water loss, putting your skin barrier under stress at ${weatherData.temp}°F.`;
+      routineOverride = `<strong>Routine Override:</strong> Layer hyaluronic acid on damp skin followed immediately by a ceramide-rich occlusive cream.`;
+    } else {
+      tacticalAdvice = `Current atmospheric conditions (${weatherData.temp}°F, ${weatherData.humidity}% humidity, UV Index ${weatherData.uvIndex}) require balancing hydration with your baseline defense.`;
+      routineOverride = `<strong>Routine Override:</strong> Maintain your core regimen with a broad-spectrum SPF ${weatherData.uvIndex > 5 ? '50+' : '30'} finish.`;
+    }
+
     const advice = `
-      <strong>Climate Risk Analysis for ${activeLocation}</strong><br>
-      • <strong>UV Exposure (${weatherData.uvIndex} - ${weatherData.uvLevel}):</strong> Given your tendency toward <em>${skinType}</em> skin and concerns with <strong>${issueNames}</strong>, high UV radiation accelerates collagen breakdown and hyperpigmentation flare-ups.<br>
-      • <strong>Atmospheric Humidity (${weatherData.humidity}%):</strong> ${weatherData.humidity < 40 ? 'Low ambient moisture pulls water from the stratum corneum, risking severe barrier dehydration and flaking.' : 'Elevated moisture increases sebum oxidation, raising breakout probability for your profile.'}<br><br>
-      <strong>Customized Daily Protection Protocol:</strong><br>
-      1. <em>Morning Adjustment:</em> Apply a broad-spectrum mineral SPF ${weatherData.uvIndex > 6 ? '50+' : '30'} with iron oxides to shield against high-energy visible light.<br>
-      2. <em>Barrier Shielding:</em> Integrate a targeted humectant-to-occlusive layering sequence to counteract the local ${weatherData.temp}°F climate stress.
+      <div style="margin-bottom: 8px;"><strong>Microclimate Impact:</strong> ${tacticalAdvice}</div>
+      <div style="background: var(--sage-light); padding: 10px 14px; border-radius: 6px; border-left: 3px solid var(--sage);">${routineOverride}</div>
     `;
 
     res.json({ 
@@ -31,25 +41,43 @@ router.post('/advice', async (req, res) => {
     });
   } catch (err) {
     console.error('Environmental advisor error:', err);
-    res.status(500).json({ error: 'Failed to generate environmental advice.' });
+    res.status(500).json({ error: 'Failed to fetch real-time weather data.' });
   }
 });
 
-function getTelemetryForLocation(loc) {
+async function fetchLiveWeather(loc) {
+  let lat = 48.85, lon = 2.35; // Default fallback coordinates
+
   if (typeof loc === 'string' && loc.includes('Lat:')) {
-    // Generate dynamic telemetry based on coordinate hash for interactive map clicks
-    const hash = loc.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return {
-      uvIndex: (hash % 8) + 2, // Generates a realistic UV index between 2 and 9
-      uvLevel: (hash % 8) + 2 > 6 ? 'High' : 'Moderate',
-      humidity: (hash % 60) + 25, // Generates humidity between 25% and 85%
-      temp: (hash % 40) + 50      // Generates temp between 50°F and 90°F
-    };
+    const match = loc.match(/Lat:\s*([-\d.]+),\s*Lon:\s*([-\d.]+)/);
+    if (match) {
+      lat = parseFloat(match[1]);
+      lon = parseFloat(match[2]);
+    }
   }
-  if (loc.includes('Miami')) return { uvIndex: 9, uvLevel: 'Very High', humidity: 78, temp: 88 };
-  if (loc.includes('Denver')) return { uvIndex: 8, uvLevel: 'Very High', humidity: 24, temp: 72 };
-  if (loc.includes('London')) return { uvIndex: 3, uvLevel: 'Moderate', humidity: 82, temp: 58 };
-  return { uvIndex: 6, uvLevel: 'High', humidity: 50, temp: 72 };
+
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m&hourly=uv_index&timezone=auto`;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    const tempCelsius = data.current?.temperature_2m ?? 21.5;
+    const tempFahrenheit = Math.round((tempCelsius * 9/5) + 32); 
+    const humidity = data.current?.relative_humidity_2m ?? 64;
+
+    const currentHourIndex = new Date().getHours();
+    const uvIndex = Math.round(data.hourly?.uv_index?.[currentHourIndex] ?? 5);
+
+    return {
+      uvIndex: uvIndex,
+      uvLevel: uvIndex >= 8 ? 'Very High' : uvIndex >= 6 ? 'High' : 'Moderate',
+      humidity: humidity,
+      temp: tempFahrenheit
+    };
+  } catch (apiErr) {
+    console.warn('External weather API fallback triggered:', apiErr);
+    return { uvIndex: 5, uvLevel: 'Moderate', humidity: 64, temp: 71 };
+  }
 }
 
 module.exports = router;
