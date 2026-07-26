@@ -70,6 +70,29 @@ main {
   margin-bottom: 2.5rem;
 }
 
+.issue-card, 
+.routine-section .step, 
+div[style*="background:var(--warm)"], 
+div[style*="background:#f5f0e8"] {
+  break-inside: avoid !important;
+  page-break-inside: avoid !important;
+}
+
+/* Keep section titles tethered to the items immediately following them */
+.section-title {
+  break-after: avoid !important;
+  page-break-after: avoid !important;
+  break-inside: avoid !important;
+  page-break-inside: avoid !important;
+}
+
+/* Ensure routine section wrappers can split between individual steps instead of moving the whole block */
+.routine-section {
+  break-inside: auto !important;
+  page-break-inside: auto !important;
+}
+
+
 .hero h2 {
   font-family: 'DM Serif Display', serif;
   font-size: 2.2rem;

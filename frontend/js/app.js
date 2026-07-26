@@ -189,16 +189,22 @@ async function analyzeImage() {
   }
 }
 
-// Global PDF Download trigger matching the exact format of dashboard reports
+// Unified Live PDF Download trigger matching the exact format of dashboard reports
 window.downloadPDFReport = function() {
-  const element = document.getElementById('pdfReportInnerContent');
+  const element = document.getElementById('results');
   if (!element || !element.innerHTML.trim()) {
     alert('Report content not found.');
     return;
   }
 
-  const templateWrapper = document.getElementById('pdfReportTemplate');
-  templateWrapper.style.display = 'block';
+  // Temporarily hide the download button from the PDF capture
+  const downloadBtn = element.querySelector('button');
+  if (downloadBtn) downloadBtn.style.display = 'none';
+
+  const originalBackground = element.style.background;
+  const originalPadding = element.style.padding;
+  const originalColor = element.style.color;
+
   element.style.background = '#ffffff';
   element.style.padding = '20px';
   element.style.color = '#1a1a1a';
@@ -216,12 +222,17 @@ window.downloadPDFReport = function() {
     jsPDF:       { unit: 'in', format: 'letter', orientation: 'portrait' }
   };
 
-  html2pdf().from(templateWrapper).set(opt).save().then(() => {
-    templateWrapper.style.display = 'none';
-    element.style.padding = '';
+  html2pdf().from(element).set(opt).save().then(() => {
+    if (downloadBtn) downloadBtn.style.display = 'block';
+    element.style.background = originalBackground;
+    element.style.padding = originalPadding;
+    element.style.color = originalColor;
   }).catch(err => {
     console.error('PDF generation error:', err);
-    templateWrapper.style.display = 'none';
+    if (downloadBtn) downloadBtn.style.display = 'block';
+    element.style.background = originalBackground;
+    element.style.padding = originalPadding;
+    element.style.color = originalColor;
     alert('Failed to generate PDF report.');
   });
 };

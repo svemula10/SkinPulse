@@ -128,7 +128,7 @@ function viewScanReport(index) {
     ${clientInfoBlock}
 
     <div class="results-header">
-      <h2>Archived Report<br><span>$<span>${new Date(scan.timestamp.endsWith('Z') ? scan.timestamp : scan.timestamp + 'Z').toLocaleDateString()}</span></span></h2>
+      <h2>Archived Report<br><span>${new Date(scan.timestamp.endsWith('Z') ? scan.timestamp : scan.timestamp + 'Z').toLocaleDateString()}</span></h2>
       <div class="skin-score">
         <span class="num">${a.overallScore}</span>
         <div class="lbl">Skin score</div>
