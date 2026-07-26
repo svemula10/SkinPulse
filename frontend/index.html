@@ -78,23 +78,27 @@
     <div id="results"></div>
   </main>
 
-  <div id="pdfReportTemplate" style="display: none; background: #ffffff; color: #1a1a1a; padding: 40px; font-family: 'DM Sans', sans-serif; max-width: 700px; margin: 0 auto;">
-    <div style="border-bottom: 2px solid #4a7c5f; padding-bottom: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; page-break-inside: avoid;">
+  <div id="pdfReportTemplate" style="display: none; background: #ffffff; color: #1a1a1a; padding: 25px; font-family: 'DM Sans', sans-serif; width: 100%; box-sizing: border-box;">
+    <div style="border-bottom: 2px solid #4a7c5f; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; page-break-inside: avoid;">
       <div>
-        <h1 style="font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: #1a1a1a; margin: 0;">SkinPulse Clinical Assessment</h1>
-        <p style="font-size: 0.75rem; color: #666; margin: 4px 0 0 0;">AI-Powered Dermatological Diagnostics & Routine Planner</p>
+        <h1 style="font-family: 'DM Serif Display', serif; font-size: 1.4rem; color: #1a1a1a; margin: 0;">SkinPulse Clinical Assessment</h1>
+        <p style="font-size: 0.7rem; color: #666; margin: 4px 0 0 0;">AI-Powered Dermatological Diagnostics & Routine Planner</p>
       </div>
-      <div style="text-align: right; font-size: 0.75rem; color: #666;" id="pdfDate"></div>
+      <div style="text-align: right; font-size: 0.7rem; color: #666;" id="pdfDate"></div>
     </div>
 
-    <div id="pdfReportInnerContent">
+    <div id="pdfReportInnerContent" style="background: #ffffff; color: #1a1a1a;">
       </div>
 
-    <div style="margin-top: 40px; border-top: 1px solid #ddd; padding-top: 15px; font-size: 0.65rem; color: #666; text-align: center; page-break-inside: avoid;">
+    <div style="margin-top: 30px; border-top: 1px solid #ddd; padding-top: 10px; font-size: 0.6rem; color: #666; text-align: center; page-break-inside: avoid;">
       SkinPulse AI Diagnostic Report. Generated for informational purposes and routine optimization; does not substitute professional medical advice.
     </div>
   </div>
 
+  <div id="liveReportContainer" style="display: none; background: #ffffff; color: #1a1a1a; padding: 20px; max-width: 700px; margin: 0 auto;">
+    <div id="liveReportContent" style="background: #ffffff; color: #1a1a1a;"></div>
+  </div>
+  
   <script src="js/app.js"></script>
 </body>
 </html>
