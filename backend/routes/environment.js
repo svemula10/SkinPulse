@@ -8,64 +8,60 @@ router.post('/advice', async (req, res) => {
     const activeLocation = location || 'Selected Coordinates';
     const weatherData = await fetchLiveWeather(activeLocation);
 
-    const issueList = (issues || []).map(i => i.name.toLowerCase());
+    const issueList = (issues || []).map(i => (i.name || '').toLowerCase());
     const hasAcne = issueList.some(i => i.includes('acne') || i.includes('breakout') || i.includes('blemish'));
     const hasDryness = issueList.some(i => i.includes('dry') || i.includes('dehydrat') || i.includes('flake'));
     const hasPigmentation = issueList.some(i => i.includes('pigment') || i.includes('spot') || i.includes('dark') || i.includes('melasma'));
 
-    // 1. General Climate Impact Content
-    let generalEducation = `At <strong>${weatherData.temp}°F</strong> with a relative humidity of <strong>${weatherData.humidity}%</strong> and a UV index of <strong>${weatherData.uvIndex} (${weatherData.uvLevel})</strong>, your skin faces distinct atmospheric stressors. `;
-    if (weatherData.humidity > 60) {
-      generalEducation += `High humidity levels promote excessive sebum secretion and sweat buildup, which can mix with dead skin cells and clog pores. `;
-    } else if (weatherData.humidity < 40) {
-      generalEducation += `Low relative humidity accelerates Transepidermal Water Loss (TEWL), weakening the lipid matrix of the skin barrier and causing micro-cracks. `;
+    // 1. Atmospheric Stress Profile
+    const atmosphericSummary = `At ${weatherData.temp}°F with ${weatherData.humidity}% relative humidity and a UV Index of ${weatherData.uvIndex} (${weatherData.uvLevel}), your skin is operating under active environmental stress. ${
+      weatherData.temp > 80 ? 'Elevated temperatures increase micro-perspiration, diluting natural lipid protections.' : weatherData.temp < 55 ? 'Cooler air dampens micro-circulation, slowing down natural cellular turnover.' : 'Ambient temperature remains at a stable baseline.'
+    }`;
+
+    // 2. Barrier Integrity & Cellular Vulnerability
+    let barrierAnalysis = `Your historical profile classification indicates a <strong>${skinType}</strong> barrier. `;
+    if (weatherData.humidity < 40) {
+      barrierAnalysis += `Because humidity is low (${weatherData.humidity}%), a steep moisture vapor pressure gradient pulls water directly out of your stratum corneum. This accelerates Transepidermal Water Loss (TEWL), leading to micro-fissures in your lipid matrix and heightened sensitivity.`;
+    } else if (weatherData.humidity > 60) {
+      barrierAnalysis += `With high ambient moisture (${weatherData.humidity}%), perspiration and sebum linger on the epidermis. For a ${skinType} profile, this creates an environment where dead skin cells bind together, clogging pores and fueling bacterial proliferation.`;
     } else {
-      generalEducation += `Moderate humidity provides a stable baseline, though environmental free radicals still pose mild oxidative stress. `;
+      barrierAnalysis += `Moderate humidity maintains a balanced evaporation rate, minimizing extreme barrier shock.`;
     }
+
+    // 3. Photoaging & Pigmentation Risk
+    let photoagingRisk = `With a UV Index of ${weatherData.uvIndex}, solar radiation poses a direct threat to cellular DNA and collagen structures. `;
     if (weatherData.uvIndex >= 6) {
-      generalEducation += `Simultaneously, high UV radiation forces melanocytes to over-produce melanin as a defense mechanism, elevating the risk of sun damage and premature photoaging.`;
+      photoagingRisk += `High-intensity UVA/UVB rays penetrate deep into the dermis, generating reactive oxygen species (free radicals) that break down collagen fibers and stimulate melanocytes. ${hasPigmentation ? 'Given your logged history of hyperpigmentation, this triggers an immediate defensive melanin surge, worsening dark spots.' : ''}`;
+    } else {
+      photoagingRisk += `Moderate radiation requires standard daily protection to prevent cumulative photo-damage.`;
     }
 
-    // 2. Profile-Specific Vulnerabilities Content
-    let profileVulnerability = `As a user with <strong>${skinType}</strong> skin type and logged concerns (${issueList.join(', ') || 'general baseline'}), your specific barrier is uniquely exposed here. `;
-    if (hasAcne && weatherData.humidity > 60) {
-      profileVulnerability += `Because your profile exhibits breakout tendencies, trapped perspiration and oil in this humid microclimate drastically raise inflammatory lesion risks.`;
-    } else if (hasDryness && weatherData.humidity < 40) {
-      profileVulnerability += `Given your tendency toward dryness and dehydration, dry air will strip your skin's remaining surface moisture, leading to tightness, flaking, and irritation.`;
-    } else if (hasPigmentation && weatherData.uvIndex >= 6) {
-      profileVulnerability += `With existing pigmentation concerns, the current UV intensity will directly reactivate dormant melanin clusters, darkening post-inflammatory marks.`;
-    } else {
-      profileVulnerability += `Your baseline profile requires maintaining lipid balance to prevent environmental sensitivity flare-ups.`;
-    }
+    // 4. Detailed Clinical Protocol & Routine Overrides
+    let clinicalProtocol = `
+      <li><strong>Environmental Shielding:</strong> Apply a broad-spectrum mineral SPF ${weatherData.uvIndex >= 6 ? '50+' : '30'} featuring non-nano zinc oxide and iron oxides to block both UV and High-Energy Visible (HEV) blue light.</li>
+      <li><strong>Antioxidant Layering:</strong> Integrate an L-Ascorbic Acid (Vitamin C) serum into your morning sequence to neutralize free radicals generated by local UV exposure.</li>
+    `;
 
-    // 3. Actionable Routine Overrides Content
-    let routineOverrides = "";
-    if (weatherData.uvIndex >= 6) {
-      routineOverrides += `<li><strong>UV Defense Protocol:</strong> Switch to a broad-spectrum mineral SPF 50+ containing zinc oxide and iron oxides to block visible and ultraviolet light. Reapply every 2 hours outdoors.</li>`;
+    if (weatherData.humidity < 40 || hasDryness) {
+      clinicalProtocol += `<li><strong>Barrier Recovery Protocol:</strong> Layer a low-molecular-weight hyaluronic acid serum onto damp skin, followed immediately by a ceramide-rich occlusive moisturizer to lock in hydration. Avoid foaming cleansers.</li>`;
+    } else if (weatherData.humidity > 60 && hasAcne) {
+      clinicalProtocol += `<li><strong>Clarifying Regimen Override:</strong> Swap creamy cleansers for a gentle 2% salicylic acid (BHA) wash. Use a lightweight, non-comedogenic gel hydrator to prevent oil-trapping.</li>`;
     } else {
-      routineOverrides += `<li><strong>Daily Shield:</strong> Maintain a broad-spectrum SPF 30+ finish to guard against incidental UV exposure.</li>`;
-    }
-
-    if (weatherData.humidity > 60 && hasAcne) {
-      routineOverrides += `<li><strong>Cleansing Adjustment:</strong> Swap creamy cleansers for a gentle 2% salicylic acid (BHA) wash to clear pore linings without disrupting moisture balance.</li>`;
-      routineOverrides += `<li><strong>Hydration Swap:</strong> Replace thick occlusive creams with an oil-free hyaluronic acid gel hydrator.</li>`;
-    } else if (weatherData.humidity < 40 || hasDryness) {
-      routineOverrides += `<li><strong>Barrier Layering:</strong> Apply a pure humectant serum onto damp skin, immediately followed by a ceramide-rich barrier repair cream to seal micro-fissures.</li>`;
-    } else {
-      routineOverrides += `<li><strong>Antioxidant Boost:</strong> Layer a Vitamin C serum in your morning regimen to neutralize atmospheric free radicals.</li>`;
+      clinicalProtocol += `<li><strong>Maintenance Regimen:</strong> Maintain a gentle, pH-balanced cleansing routine supplemented with barrier-supporting peptides.</li>`;
     }
 
     res.json({ 
       success: true, 
-      generalEducation,
-      profileVulnerability,
-      routineOverrides,
+      atmosphericSummary,
+      barrierAnalysis,
+      photoagingRisk,
+      clinicalProtocol,
       weather: weatherData,
       location: activeLocation 
     });
   } catch (err) {
     console.error('Environmental advisor error:', err);
-    res.status(500).json({ error: 'Failed to fetch real-time weather data.' });
+    res.status(500).json({ error: 'Failed to fetch environmental data.' });
   }
 });
 
@@ -78,25 +74,19 @@ async function fetchLiveWeather(loc) {
       lon = parseFloat(match[2]);
     }
   }
-
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m&hourly=uv_index&timezone=auto`;
-    const response = await fetch(url);
-    const data = await response.json();
-
-    const tempCelsius = data.current?.temperature_2m ?? 21.5;
-    const tempFahrenheit = Math.round((tempCelsius * 9/5) + 32); 
+    const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m&hourly=uv_index&timezone=auto`);
+    const data = await res.json();
+    const tempF = Math.round(((data.current?.temperature_2m ?? 21.5) * 9/5) + 32);
     const humidity = data.current?.relative_humidity_2m ?? 64;
-    const currentHourIndex = new Date().getHours();
-    const uvIndex = Math.round(data.hourly?.uv_index?.[currentHourIndex] ?? 5);
-
+    const uvIndex = Math.round(data.hourly?.uv_index?.[new Date().getHours()] ?? 5);
     return {
-      uvIndex: uvIndex,
+      uvIndex,
       uvLevel: uvIndex >= 8 ? 'Very High' : uvIndex >= 6 ? 'High' : 'Moderate',
-      humidity: humidity,
-      temp: tempFahrenheit
+      humidity,
+      temp: tempF
     };
-  } catch (apiErr) {
+  } catch {
     return { uvIndex: 5, uvLevel: 'Moderate', humidity: 64, temp: 71 };
   }
 }

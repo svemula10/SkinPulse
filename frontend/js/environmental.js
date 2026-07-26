@@ -149,19 +149,24 @@ async function handleEnvironmentalAnalysis() {
         </div>
 
         <div style="background: var(--card); padding: 1.25rem; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 1rem;">
-          <h4 style="font-size: 0.95rem; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">🌍 General Atmospheric Impact</h4>
-          <p style="font-size: 0.88rem; line-height: 1.6; color: var(--muted); margin: 0;">${data.generalEducation}</p>
+          <h4 style="font-size: 0.95rem; color: var(--text); margin-bottom: 6px;">🌍 1. Atmospheric Stress Profile</h4>
+          <p style="font-size: 0.88rem; line-height: 1.6; color: var(--muted); margin: 0;">${data.atmosphericSummary}</p>
         </div>
 
         <div style="background: var(--card); padding: 1.25rem; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 1rem;">
-          <h4 style="font-size: 0.95rem; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">🔍 Specific Profile Sensitivity Analysis</h4>
-          <p style="font-size: 0.88rem; line-height: 1.6; color: var(--muted); margin: 0;">${data.profileVulnerability}</p>
+          <h4 style="font-size: 0.95rem; color: var(--text); margin-bottom: 6px;">🛡️ 2. Barrier Integrity & Cellular Impact</h4>
+          <p style="font-size: 0.88rem; line-height: 1.6; color: var(--muted); margin: 0;">${data.barrierAnalysis}</p>
+        </div>
+
+        <div style="background: var(--card); padding: 1.25rem; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 1rem;">
+          <h4 style="font-size: 0.95rem; color: var(--text); margin-bottom: 6px;">☀️ 3. Radiation & Photoaging Evaluation</h4>
+          <p style="font-size: 0.88rem; line-height: 1.6; color: var(--muted); margin: 0;">${data.photoagingRisk}</p>
         </div>
 
         <div style="background: var(--card); padding: 1.25rem; border-radius: 10px; border: 1px solid var(--border);">
-          <h4 style="font-size: 0.95rem; color: var(--text); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">💡 Targeted Daily Routine Overrides</h4>
+          <h4 style="font-size: 0.95rem; color: var(--text); margin-bottom: 10px;">📋 4. Actionable Day-Long Clinical Protocol</h4>
           <ul style="font-size: 0.88rem; line-height: 1.6; color: var(--muted); margin: 0; padding-left: 1.2rem;">
-            ${data.routineOverrides}
+            ${data.clinicalProtocol}
           </ul>
         </div>
       </div>

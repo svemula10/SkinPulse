@@ -31,7 +31,7 @@ async function loadProfilesIntoDropdown() {
 
 async function handleSafetyCheck() {
   const select = document.getElementById('safetyScanSelect');
-  const resultsDiv = [c = document.getElementById('safetyResultsContent')][0];
+  const resultsDiv = document.getElementById('safetyResultsContent');
   const selectedIndex = select.value;
 
   if (selectedIndex === "") {
@@ -50,7 +50,7 @@ async function handleSafetyCheck() {
 
   const scan = allScans[selectedIndex];
   resultsDiv.style.display = 'block';
-  resultsDiv.innerHTML = `<p style="color: var(--muted); text-align: center; padding: 1rem;">Cross-referencing chemical matrix and historical scan issues...</p>`;
+  resultsDiv.innerHTML = `<p style="color: var(--muted); text-align: center; padding: 1rem;">Analyzing your routine compatibility against your skin profile...</p>`;
 
   try {
     const res = await fetch('http://localhost:5000/api/safety/check', {
@@ -59,7 +59,7 @@ async function handleSafetyCheck() {
       body: JSON.stringify({
         ingredients,
         skinType: scan.skin_type,
-        issues: scan.analysis_data?.issues || [] // Passes historical scan issues directly
+        issues: scan.analysis_data?.issues || []
       })
     });
     const data = await res.json();
@@ -68,31 +68,35 @@ async function handleSafetyCheck() {
     let conflictsHtml = '';
     if (data.conflicts.length > 0) {
       conflictsHtml = data.conflicts.map(c => `
-        <div style="background: #fdf2f2; border: 1px solid #f5c6c6; border-left: 4px solid #d9534f; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
-          <div style="font-weight: 600; color: #a94442; text-transform: capitalize; margin-bottom: 4px;">⚠️ Clash Detected: ${c.pair[0]} + ${c.pair[1]}</div>
-          <div style="font-size: 0.85rem; color: var(--text);">${c.reason}</div>
+        <div style="background: #fdf2f2; border: 1px solid #f5c6c6; border-left: 4px solid #d9534f; padding: 14px; border-radius: 8px; margin-bottom: 12px;">
+          <div style="font-weight: 600; color: #a94442; text-transform: capitalize; margin-bottom: 4px; font-size: 0.9rem;">⚠️ Chemical Clash: ${c.pair[0]} + ${c.pair[1]}</div>
+          <div style="font-size: 0.85rem; color: var(--text); line-height: 1.5;"><strong>Why this clashes:</strong> ${c.mechanism}</div>
         </div>
       `).join('');
     } else {
       conflictsHtml = `
-        <div style="background: #f2f9f4; border: 1px solid #c3e6cb; border-left: 4px solid var(--sage); padding: 12px; border-radius: 6px; margin-bottom: 10px;">
-          <div style="font-weight: 600; color: #28a745; margin-bottom: 4px;">✅ Clean Routine Verified</div>
-          <div style="font-size: 0.85rem; color: var(--text);">No dangerous chemical clashes detected among your selected active ingredients.</div>
+        <div style="background: #f2f9f4; border: 1px solid #c3e6cb; border-left: 4px solid var(--sage); padding: 14px; border-radius: 8px; margin-bottom: 12px;">
+          <div style="font-weight: 600; color: #28a745; margin-bottom: 4px; font-size: 0.9rem;">✅ Routine is Safe</div>
+          <div style="font-size: 0.85rem; color: var(--text);">No harsh chemical conflicts found among your selected ingredients.</div>
         </div>
       `;
     }
 
     resultsDiv.innerHTML = `
-      <div style="background: var(--warm); border-radius: 12px; padding: 1.5rem; margin-top: 1rem;">
-        <h3 style="margin-bottom: 0.2rem; color: var(--text); font-family: 'DM Serif Display', serif;">Routine Safety Report</h3>
-        <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 1.25rem;">Evaluated for <strong>${escapeHtml(scan.name)}</strong> (${escapeHtml(scan.skin_type)})</p>
+      <div style="background: var(--warm); border-radius: 12px; padding: 1.75rem; margin-top: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+        <h3 style="margin-bottom: 0.2rem; color: var(--text); font-family: 'DM Serif Display', serif; font-size: 1.3rem;">Routine Safety Report</h3>
+        <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 1.25rem;">Target Profile: <strong>${escapeHtml(scan.name)}</strong> (${escapeHtml(scan.skin_type)})</p>
         
-        <div style="margin-bottom: 1rem;">
+        <div style="background: var(--card); padding: 1.25rem; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 1rem;">
+          <h4 style="font-size: 0.95rem; color: var(--text); margin-bottom: 10px;">🧪 1. Active Ingredient Interactions</h4>
           ${conflictsHtml}
         </div>
 
-        <div style="background: var(--card); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border); font-size: 0.9rem; line-height: 1.6; color: var(--text);">
-          <strong>Clinical Safety Recommendation:</strong><br>${data.recommendation}
+        <div style="background: var(--card); padding: 1.25rem; border-radius: 10px; border: 1px solid var(--border);">
+          <h4 style="font-size: 0.95rem; color: var(--text); margin-bottom: 8px;">🛡️ 2. Recommended Routine Schedule</h4>
+          <div style="font-size: 0.88rem; line-height: 1.6; color: var(--muted);">
+            ${data.mitigationStrategy}
+          </div>
         </div>
       </div>
     `;
