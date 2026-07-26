@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const Anthropic = require('@anthropic-ai/sdk');
 
-// Initialize Anthropic client
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
@@ -14,12 +13,17 @@ router.post('/analyze', async (req, res) => {
       return res.status(400).json({ error: 'Image data and media type are required.' });
     }
 
-    // 1. STAGE 1: Image Validation (Checking if it's a real photo of a face)
-    const valPrompt = "Look at this image. Does this image contain a real human face or a portrait photo suitable for a skin analysis? Answer ONLY with 'YES' or 'NO', followed by a very brief explanation.";
-    
+    // 1. STAGE 1: Image Validation with Prompt Caching
     const valMessage = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 150,
+      system: [
+        {
+          type: 'text',
+          text: "You are a specialized dermatological image validator. Your task is to inspect incoming images to determine if they contain a real human face suitable for professional skin health evaluation.",
+          cache_control: { type: 'ephemeral' } // Caches the system instruction block
+        }
+      ],
       messages: [
         {
           role: 'user',
@@ -34,7 +38,7 @@ router.post('/analyze', async (req, res) => {
             },
             {
               type: 'text',
-              text: valPrompt,
+              text: "Does this image contain a real human face or a portrait photo suitable for a skin analysis? Answer ONLY with 'YES' or 'NO', followed by a very brief explanation.",
             }
           ],
         }
@@ -46,7 +50,7 @@ router.post('/analyze', async (req, res) => {
       return res.status(400).json({ error: 'Please upload a real photo of a face.' });
     }
 
-    // 2. STAGE 2: Comprehensive Skin Analysis & Routine Generation
+    // 2. STAGE 2: Comprehensive Skin Analysis & Routine Generation with Prompt Caching
     const analysisPrompt = `You are an expert dermatologist and skincare consultant. Analyze this face photo and return a JSON object (and ONLY valid JSON, no markdown code blocks, no preamble) matching this exact schema:
 {
   "overallScore": 85,
@@ -95,6 +99,13 @@ router.post('/analyze', async (req, res) => {
     const analysisMessage = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 2048,
+      system: [
+        {
+          type: 'text',
+          text: "You are an advanced clinical AI dermatology engine. Your job is to strictly evaluate skin conditions, score clarity, evenness, hydration, texture, and return rigorous JSON diagnostics.",
+          cache_control: { type: 'ephemeral' } // Caches the heavy system instructions prefix
+        }
+      ],
       messages: [
         {
           role: 'user',
@@ -117,15 +128,13 @@ router.post('/analyze', async (req, res) => {
     });
 
     const rawContent = analysisMessage.content?.[0]?.text || '';
-    
-    // Clean up potential code block wrappers if the model includes them
     const cleanedJSON = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
     const analysisData = JSON.parse(cleanedJSON);
 
     res.json(analysisData);
 
   } catch (err) {
-    console.error('Claude API Error:', err);
+    console.error('Claude API Error with Caching:', err);
     res.status(500).json({ error: 'Failed to process skin analysis.' });
   }
 });
