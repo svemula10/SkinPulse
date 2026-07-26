@@ -1,166 +1,133 @@
 const express = require('express');
 const router = express.Router();
-const { Groq } = require('groq-sdk');
-const db = require('../database');
+const Anthropic = require('@anthropic-ai/sdk');
 
-// POST /api/analyze
+// Initialize Anthropic client
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
+
 router.post('/analyze', async (req, res) => {
-  const { image, mediaType } = req.body;
-  if (!image || !mediaType) {
-    return res.status(400).json({ error: 'Missing image or media type.' });
-  }
-
-  const apiKey = process.env.GROK_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ error: 'Server API key not configured in .env file.' });
-  }
-
-  const groq = new Groq({ apiKey });
-
   try {
-    const imageUrl = `data:${mediaType};base64,${image}`;
+    const { image, mediaType } = req.body;
+    if (!image || !mediaType) {
+      return res.status(400).json({ error: 'Image data and media type are required.' });
+    }
 
-    // Step 1: Two-stage validation check via Groq using qwen/qwen3.6-27b
-    const valCompletion = await groq.chat.completions.create({
-      model: 'qwen/qwen3.6-27b',
+    // 1. STAGE 1: Image Validation (Checking if it's a real photo of a face)
+    const valPrompt = "Look at this image. Does this image contain a real human face or a portrait photo suitable for a skin analysis? Answer ONLY with 'YES' or 'NO', followed by a very brief explanation.";
+    
+    const valMessage = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 150,
       messages: [
         {
           role: 'user',
           content: [
-            { 
-              type: 'text', 
-              text: 'Look at this image. Is there a human face present, even if lighting or quality is imperfect? Answer with YES if a face is visible, or NO if it is completely empty, an icon, or a cartoon.' 
+            {
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: mediaType,
+                data: image,
+              },
             },
-            { type: 'image_url', image_url: { url: imageUrl } }
-          ]
+            {
+              type: 'text',
+              text: valPrompt,
+            }
+          ],
         }
       ],
-      temperature: 0.1,
-      max_completion_tokens: 50,
     });
 
-    const answer = valCompletion.choices?.[0]?.message?.content?.trim().toUpperCase() || '';
-    
-    // Flexible check — ensures minor model chatter or webcam variations pass successfully
-    if (!answer.includes('YES')) {
-      return res.status(422).json({ error: 'Please upload a real photo of a face. Illustrations and icons are not accepted.' });
+    const valText = valMessage.content?.[0]?.text || '';
+    if (!valText.toUpperCase().includes('YES')) {
+      return res.status(400).json({ error: 'Please upload a real photo of a face.' });
     }
 
-    // Step 2: Full skin diagnostic prompt enforcing rigid JSON output
-    const prompt = `You are a professional dermatologist AI assistant. Carefully analyze this face photo and provide a detailed skin assessment.
-IMPORTANT: Respond ONLY with a valid JSON object, no markdown, no backticks, no extra text.
-Return exactly this structure:
+    // 2. STAGE 2: Comprehensive Skin Analysis & Routine Generation
+    const analysisPrompt = `You are an expert dermatologist and skincare consultant. Analyze this face photo and return a JSON object (and ONLY valid JSON, no markdown code blocks, no preamble) matching this exact schema:
 {
-  "overallScore": <number 1-100>,
-  "skinType": "<Normal|Dry|Oily|Combination|Sensitive>",
-  "imageQuality": "<good|fair|poor>",
-  "scoreBreakdown": { "clarity": <1-100>, "evenness": <1-100>, "hydration": <1-100>, "texture": <1-100> },
-  "issues": [{"name": "<issue name>", "severity": "<mild|moderate|severe>", "description": "<1 sentence>"}],
-  "morningRoutine": [{"step": "<step name>", "instruction": "<what to do>", "productHint": "<ingredient or product type>"}],
-  "eveningRoutine": [{"step": "<step name>", "instruction": "<what to do>", "productHint": "<ingredient or product type>"}],
-  "weeklyTreatments": [{"step": "<treatment>", "instruction": "<what to do>", "productHint": "<ingredient or product type>"}],
-  "lifestyleTips": ["<tip 1>", "<tip 2>", "<tip 3>", "<tip 4>"]
+  "overallScore": 85,
+  "skinType": "Combination",
+  "imageQuality": "Good",
+  "scoreBreakdown": {
+    "clarity": 80,
+    "evenness": 85,
+    "hydration": 90,
+    "texture": 85
+  },
+  "issues": [
+    {
+      "name": "Mild Dryness",
+      "severity": "mild",
+      "description": "Slight flaking observed around the cheek area."
+    }
+  ],
+  "morningRoutine": [
+    {
+      "step": "Gentle Cleanser",
+      "instruction": "Wash face with lukewarm water and a hydrating cleanser.",
+      "productHint": "Ceramide-based cleanser"
+    }
+  ],
+  "eveningRoutine": [
+    {
+      "step": "Double Cleanse",
+      "instruction": "Remove impurities with a gentle cleanser.",
+      "productHint": "Non-comedogenic wash"
+    }
+  ],
+  "weeklyTreatments": [
+    {
+      "step": "Hydrating Mask",
+      "instruction": "Apply a soothing sheet mask once a week.",
+      "productHint": "Aloe or Hyaluronic Acid mask"
+    }
+  ],
+  "lifestyleTips": [
+    "Drink at least 8 glasses of water daily.",
+    "Ensure 7-8 hours of quality sleep."
+  ]
 }`;
 
-    const analysisCompletion = await groq.chat.completions.create({
-      model: 'qwen/qwen3.6-27b',
+    const analysisMessage = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 2048,
       messages: [
         {
           role: 'user',
           content: [
-            { type: 'text', text: prompt },
-            { type: 'image_url', image_url: { url: imageUrl } }
-          ]
+            {
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: mediaType,
+                data: image,
+              },
+            },
+            {
+              type: 'text',
+              text: analysisPrompt,
+            }
+          ],
         }
       ],
-      temperature: 0.6,
-      max_completion_tokens: 2048,
-      top_p: 0.95
     });
 
-    const rawText = analysisCompletion.choices?.[0]?.message?.content || '';
+    const rawContent = analysisMessage.content?.[0]?.text || '';
     
-    // Clean markdown code blocks
-    let cleanText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
-    
-    // Isolate only the pure JSON object between the first '{' and the last '}'
-    const firstBrace = cleanText.indexOf('{');
-    const lastBrace = cleanText.lastIndexOf('}');
-    
-    if (firstBrace === -1 || lastBrace === -1) {
-      throw new Error('No valid JSON object found in Groq response.');
-    }
-    
-    const jsonString = cleanText.substring(firstBrace, lastBrace + 1);
-    const analysisJson = JSON.parse(jsonString);
+    // Clean up potential code block wrappers if the model includes them
+    const cleanedJSON = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
+    const analysisData = JSON.parse(cleanedJSON);
 
-    if (!analysisJson) throw new Error('Failed to parse JSON structure from Groq response.');
+    res.json(analysisData);
 
-    // Save session metrics into SQLite database
-    db.run(
-      `INSERT INTO scans (overall_score, skin_type, image_quality, analysis_data) VALUES (?, ?, ?, ?)`,
-      [analysisJson.overallScore, analysisJson.skinType, analysisJson.imageQuality, JSON.stringify(analysisJson)],
-      function(err) {
-        if (err) console.error('Failed to save scan:', err.message);
-      }
-    );
-
-    res.json(analysisJson);
   } catch (err) {
-    console.error('Analysis error:', err);
-
-    // Enhanced rate limit error handling with dynamic countdown extraction
-    if (err.status === 429 || (err.message && err.message.toLowerCase().includes('rate limit'))) {
-      let retryMessage = 'Rate limit reached. Please wait a moment before trying another scan.';
-      try {
-        const errorBody = err.error?.error?.message || err.message || '';
-        const match = errorBody.match(/try again in ([0-9ms.]+)/i);
-        if (match && match[1]) {
-          retryMessage = `Rate limit reached. Please try again in ${match[1]}.`;
-        }
-      } catch (parseErr) {
-        console.error('Failed to parse retry time:', parseErr);
-      }
-      return res.status(429).json({ error: retryMessage });
-    }
-
-    res.status(500).json({ error: 'Internal server error during skin analysis.' });
+    console.error('Claude API Error:', err);
+    res.status(500).json({ error: 'Failed to process skin analysis.' });
   }
-});
-
-// GET /api/scans - Fetch historical scans for the dashboard analytics
-router.get('/scans', (req, res) => {
-  db.all(`SELECT * FROM scans ORDER BY timestamp DESC`, [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    const parsedRows = rows.map(row => ({
-      ...row,
-      analysis_data: JSON.parse(row.analysis_data)
-    }));
-    res.json(parsedRows);
-  });
-});
-
-// DELETE /api/scans - Delete all historical scans
-router.delete('/scans', (req, res) => {
-  db.run(`DELETE FROM scans`, [], function(err) {
-    if (err) {
-      console.error('Failed to delete all scans:', err.message);
-      return res.status(500).json({ error: err.message });
-    }
-    res.json({ message: 'All scan history deleted successfully.' });
-  });
-});
-
-// DELETE /api/scans/:id - Delete a single specific scan by ID
-router.delete('/scans/:id', (req, res) => {
-  const scanId = req.params.id;
-  db.run(`DELETE FROM scans WHERE id = ?`, [scanId], function(err) {
-    if (err) {
-      console.error('Failed to delete scan:', err.message);
-      return res.status(500).json({ error: err.message });
-    }
-    res.json({ message: `Scan ${scanId} deleted successfully.` });
-  });
 });
 
 module.exports = router;
