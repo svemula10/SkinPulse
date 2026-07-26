@@ -22,8 +22,10 @@ async function loadHistory() {
     listContainer.innerHTML = allScans.map((scan, index) => `
       <div style="background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--sage)'" onmouseout="this.style.borderColor='var(--border)'">
         <div onclick="viewScanReport(${index})" style="flex: 1; cursor: pointer;">
-          <div style="font-weight: 600; font-size: 1.05rem; color: var(--text); margin-bottom: 2px;">👤 ${escapeHtml(scan.name || 'Anonymous')}</div>
-          <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 4px;">Scan Date: ${new Date(scan.timestamp).toLocaleString()}</div>
+          <div style="display: inline-block; background: var(--sage-light); color: var(--sage); padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">
+            ${escapeHtml(scan.name || 'Anonymous')}
+          </div>
+          <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 2px;">Scan Date: ${new Date(scan.timestamp.endsWith('Z') ? scan.timestamp : scan.timestamp + 'Z').toLocaleString()}</div>
           <div style="font-weight: 500; font-size: 0.9rem; color: var(--text);">Skin Type: ${escapeHtml(scan.skin_type)}</div>
         </div>
         <div style="display: flex; align-items: center; gap: 1.5rem;">
@@ -126,7 +128,7 @@ function viewScanReport(index) {
     ${clientInfoBlock}
 
     <div class="results-header">
-      <h2>Archived Report<br><span>${new Date(scan.timestamp).toLocaleDateString()}</span></h2>
+      <h2>Archived Report<br><span>$<span>${new Date(scan.timestamp.endsWith('Z') ? scan.timestamp : scan.timestamp + 'Z').toLocaleDateString()}</span></span></h2>
       <div class="skin-score">
         <span class="num">${a.overallScore}</span>
         <div class="lbl">Skin score</div>
