@@ -18,12 +18,13 @@ async function loadHistory() {
       return;
     }
 
-    // Render original chat-thread style cards with green accenting, View, and Delete buttons
+    // Render original chat-thread style cards with name, skin type, score, view, and delete buttons
     listContainer.innerHTML = allScans.map((scan, index) => `
       <div style="background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--sage)'" onmouseout="this.style.borderColor='var(--border)'">
         <div onclick="viewScanReport(${index})" style="flex: 1; cursor: pointer;">
+          <div style="font-weight: 600; font-size: 1.05rem; color: var(--text); margin-bottom: 2px;">👤 ${escapeHtml(scan.name || 'Anonymous')}</div>
           <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 4px;">Scan Date: ${new Date(scan.timestamp).toLocaleString()}</div>
-          <div style="font-weight: 500; font-size: 1rem; color: var(--text);">Skin Type: ${scan.skin_type}</div>
+          <div style="font-weight: 500; font-size: 0.9rem; color: var(--text);">Skin Type: ${escapeHtml(scan.skin_type)}</div>
         </div>
         <div style="display: flex; align-items: center; gap: 1.5rem;">
           <div onclick="viewScanReport(${index})" style="text-align: right; cursor: pointer;">
@@ -78,6 +79,11 @@ window.deleteScan = async function(id) {
   }
 };
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
 function viewScanReport(index) {
   const scan = allScans[index];
   if (!scan) return;
@@ -109,7 +115,16 @@ function viewScanReport(index) {
 
   const tips = (a.lifestyleTips || []).map(t => `<li>${t}</li>`).join('');
 
+  const clientInfoBlock = `
+    <div style="background: var(--warm); border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1.5rem;">
+      <div style="font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 2px;">Client Name</div>
+      <div style="font-size: 1.05rem; font-weight: 500; color: var(--text);">${escapeHtml(scan.name || 'Anonymous')}</div>
+    </div>
+  `;
+
   reportContent.innerHTML = `
+    ${clientInfoBlock}
+
     <div class="results-header">
       <h2>Archived Report<br><span>${new Date(scan.timestamp).toLocaleDateString()}</span></h2>
       <div class="skin-score">
@@ -181,16 +196,16 @@ window.downloadArchivedPDFReport = function() {
   element.style.color = '#1a1a1a';
 
   const opt = {
-    margin:       [0.4, 0.4, 0.4, 0.4],
-    filename:     'SkinPulse_Professional_Dermatology_Report.pdf',
-    image:        { type: 'jpeg', quality: 0.98 },
+    margin:      [0.4, 0.4, 0.4, 0.4],
+    filename:    'SkinPulse_Professional_Dermatology_Report.pdf',
+    image:       { type: 'jpeg', quality: 0.98 },
     html2canvas:  { 
       scale: 2, 
       useCORS: true, 
       letterRendering: true,
       scrollY: 0 
     },
-    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    jsPDF:       { unit: 'in', format: 'letter', orientation: 'portrait' }
   };
 
   html2pdf().from(element).set(opt).save().then(() => {
