@@ -101,6 +101,7 @@ function viewScanReport(index) {
     <div class="issue-card ${severityColor(issue.severity)}">
       <h4>${issue.name}</h4>
       <div class="severity">${issue.severity}</div>
+      <p style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">${issue.description || ''}</p>
     </div>
   `).join('');
 
