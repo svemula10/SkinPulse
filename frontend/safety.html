@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkinPulse — Ingredient Safety Engine</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <header>
+    <div class="logo-dot">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+    </div>
+    <h1>SkinPulse</h1>
+    <span>AI Skin Analysis</span>
+    
+    <nav style="margin-left: auto; display: flex; gap: 15px; align-items: center;">
+      <a href="index.html" style="font-size: 0.85rem; color: var(--text); text-decoration: none; font-weight: 500;">Home</a>
+      <a href="dashboard.html" style="font-size: 0.85rem; color: var(--text); text-decoration: none; font-weight: 500;">Scan History</a>
+      <a href="environmental.html" style="font-size: 0.85rem; color: var(--text); text-decoration: none; font-weight: 500;">Environmental</a>
+      <a href="safety.html" style="font-size: 0.85rem; color: var(--sage); text-decoration: none; font-weight: 500;">Ingredient Safety</a>
+    </nav>
+  </header>
+
+  <main style="max-width: 750px; margin: 2rem auto; padding: 0 1.5rem;">
+    <div class="results-header" style="margin-bottom: 1.5rem;">
+      <h2>Active Ingredient <span>Clash Detector</span></h2>
+    </div>
+    <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+      Cross-reference your saved skin profile against a relational chemical conflict matrix to prevent skin barrier compromise and irritation.
+    </p>
+
+    <div style="margin-bottom: 1.25rem;">
+      <label for="safetyScanSelect" style="display: block; font-size: 0.8rem; font-weight: 500; color: var(--text); margin-bottom: 0.35rem;">Select Saved Profile</label>
+      <select id="safetyScanSelect" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 0.95rem; background: var(--card); color: var(--text);">
+        <option value="">-- Load a past scan profile --</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom: 1.25rem;">
+      <label style="display: block; font-size: 0.8rem; font-weight: 500; color: var(--text); margin-bottom: 0.35rem;">Select Active Ingredients in Your Regimen</label>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; background: var(--card); padding: 1.25rem; border: 1px solid var(--border); border-radius: var(--radius);">
+        <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" name="activeIng" value="retinol"> Retinol / Tretinoin</label>
+        <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" name="activeIng" value="salicylic acid"> Salicylic Acid (BHA)</label>
+        <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" name="activeIng" value="glycolic acid"> Glycolic Acid (AHA)</label>
+        <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" name="activeIng" value="lactic acid"> Lactic Acid (AHA)</label>
+        <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" name="activeIng" value="benzoyl peroxide"> Benzoyl Peroxide</label>
+        <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" name="activeIng" value="vitamin c"> Vitamin C (L-Ascorbic)</label>
+        <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" name="activeIng" value="physical scrub"> Physical Exfoliant Scrub</label>
+        <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 8px; cursor: pointer;"><input type="checkbox" name="activeIng" value="niacinamide"> Niacinamide</label>
+      </div>
+    </div>
+
+    <button type="button" id="checkSafetyBtn" class="new-scan-btn" style="background: var(--sage); color: white; width: 100%; padding: 0.75rem; font-size: 0.95rem; margin-bottom: 1.5rem; cursor: pointer; border: none; border-radius: var(--radius);">
+      Run Routine Compatibility Check
+    </button>
+
+    <div id="safetyResultsContent" style="display: none;"></div>
+  </main>
+
+  <script src="js/safety.js"></script>
+</body>
+</html>

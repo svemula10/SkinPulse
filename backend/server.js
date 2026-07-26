@@ -13,6 +13,10 @@ app.use(express.json({ limit: '10mb' }));
 app.use('/api', skinRoutes);
 app.use('/api/environment', require('./routes/environment'));
 
+
+const safetyRoutes = require('./routes/safety');
+app.use('/api/safety', safetyRoutes);
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`DermAI Backend running on http://localhost:${PORT}`);
