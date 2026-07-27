@@ -23,13 +23,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function initInteractiveMap() {
   // Default world view centered neutrally
-  map = L.map('climateMap').setView([20, 0], 2);
+  map = L.map('climateMap', {
+    attributionControl: false
+  }).setView([20, 0], 2);
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 18,
-    attribution: '© OpenStreetMap contributors'
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, and the GIS User Community',
+    maxZoom: 19
   }).addTo(map);
-
+  
   map.on('click', (e) => {
     const { lat, lng } = e.latlng;
     setMapLocation(lat, lng);
