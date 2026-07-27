@@ -88,5 +88,5 @@ py -m http.server 3000
 
 // Note: On Mac/Linux, use python3 -m http.server 3000.
 ```
-Open up a browser and go to http://localhost:3000/
+Open up a browser and go to http://localhost:3000/ to interact with SkinPulse
 
