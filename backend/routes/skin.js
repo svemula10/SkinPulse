@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const Anthropic = require('@anthropic-ai/sdk');
+const { Groq } = require('groq-sdk');
 const db = require('../database'); // Imports your SQLite database module
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
 });
 
-// 1. ANALYZE ROUTE (With Claude API Prompt Caching)
+// 1. ANALYZE ROUTE (With Groq & Qwen Vision)
 router.post('/analyze', async (req, res) => {
   try {
     const { image, mediaType, name } = req.body;
@@ -17,44 +17,36 @@ router.post('/analyze', async (req, res) => {
 
     const userName = name && name.trim() !== '' ? name.trim() : 'Anonymous';
 
-    // STAGE 1: Image Validation with Prompt Caching
-    const valMessage = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 150,
-      system: [
-        {
-          type: 'text',
-          text: "You are a specialized dermatological image validator. Your task is to inspect incoming images to determine if they contain a real human face suitable for professional skin health evaluation.",
-          cache_control: { type: 'ephemeral' }
-        }
-      ],
+    // STAGE 1: Image Validation
+    const valMessage = await groq.chat.completions.create({
+      model: 'qwen/qwen3.6-27b',
       messages: [
         {
           role: 'user',
           content: [
             {
-              type: 'image',
-              source: {
-                type: 'base64',
-                media_type: mediaType,
-                data: image,
-              },
+              type: 'image_url',
+              image_url: {
+                url: `data:${mediaType};base64,${image}`
+              }
             },
             {
               type: 'text',
-              text: "Does this image contain a real human face or a portrait photo suitable for a skin analysis? Answer ONLY with 'YES' or 'NO', followed by a very brief explanation.",
+              text: "Does this image contain a real human face or a portrait photo suitable for a skin analysis? Answer ONLY with 'YES' or 'NO', followed by a very brief explanation."
             }
-          ],
+          ]
         }
       ],
+      max_tokens: 60,
+      temperature: 0.2
     });
 
-    const valText = valMessage.content?.[0]?.text || '';
+    const valText = valMessage.choices?.[0]?.message?.content || '';
     if (!valText.toUpperCase().includes('YES')) {
       return res.status(400).json({ error: 'Please upload a real photo of a face.' });
     }
 
-    // STAGE 2: Comprehensive Skin Analysis & Routine Generation with Prompt Caching
+    // STAGE 2: Comprehensive Skin Analysis & Routine Generation
     const analysisPrompt = `You are an expert dermatologist and skincare consultant. Analyze this face photo and return a JSON object (and ONLY valid JSON, no markdown code blocks, no preamble) matching this exact schema:
 {
   "overallScore": 85,
@@ -100,42 +92,35 @@ router.post('/analyze', async (req, res) => {
   ]
 }`;
 
-    const analysisMessage = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 2048,
-      system: [
-        {
-          type: 'text',
-          text: "You are an advanced clinical AI dermatology engine. Your job is to strictly evaluate skin conditions, score clarity, evenness, hydration, texture, and return rigorous JSON diagnostics.",
-          cache_control: { type: 'ephemeral' }
-        }
-      ],
+    const analysisMessage = await groq.chat.completions.create({
+      model: 'qwen/qwen3.6-27b',
       messages: [
         {
           role: 'user',
           content: [
             {
-              type: 'image',
-              source: {
-                type: 'base64',
-                media_type: mediaType,
-                data: image,
-              },
+              type: 'image_url',
+              image_url: {
+                url: `data:${mediaType};base64,${image}`
+              }
             },
             {
               type: 'text',
-              text: analysisPrompt,
+              text: analysisPrompt
             }
-          ],
+          ]
         }
       ],
+      response_format: { type: "json_object" },
+      max_tokens: 2048,
+      temperature: 0.4
     });
 
-    const rawContent = analysisMessage.content?.[0]?.text || '';
+    const rawContent = analysisMessage.choices?.[0]?.message?.content || '{}';
     const cleanedJSON = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
     const analysisData = JSON.parse(cleanedJSON);
 
-    // Save scan to SQLite database automatically upon successful analysis including user name
+    // Save scan to SQLite database automatically
     db.run(
       `INSERT INTO scans (name, skin_type, overall_score, analysis_data) VALUES (?, ?, ?, ?)`,
       [userName, analysisData.skinType, analysisData.overallScore, JSON.stringify(analysisData)],
@@ -147,7 +132,7 @@ router.post('/analyze', async (req, res) => {
     res.json(analysisData);
 
   } catch (err) {
-    console.error('Claude API Error with Caching:', err);
+    console.error('Groq Vision API Error:', err);
     res.status(500).json({ error: 'Failed to process skin analysis.' });
   }
 });
@@ -159,7 +144,6 @@ router.get('/scans', (req, res) => {
       console.error('Database fetch error:', err);
       return res.status(500).json({ error: 'Failed to retrieve scan history.' });
     }
-    // Parse the JSON stored in SQLite back into an object for the frontend
     const formattedRows = rows.map(row => ({
       ...row,
       analysis_data: JSON.parse(row.analysis_data)
