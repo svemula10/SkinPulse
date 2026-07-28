@@ -53,21 +53,19 @@ camBtn.addEventListener('click', async () => {
   try {
     uploadZone.style.display = 'none';
     camBtn.style.display = 'none';
-    if (disclaimerText) disclaimerText.style.display = 'none';
     document.querySelector('.or-divider').style.display = 'none';
-
-    stream = await navigator.mediaDevices.getUserMedia({ 
+    
+    stream = await navigator.mediaDevices.getUserMedia({
       video: { 
-        facingMode: 'user',
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
-      }, 
-      audio: false 
+        facingMode: 'user', 
+        width: { ideal: 1280 }, 
+        height: { ideal: 720 } 
+      },
+      audio: false
     });
     video.srcObject = stream;
     cameraContainer.style.display = 'block';
   } catch (err) {
-    console.error(err);
     alert('Unable to access camera. Please upload a photo instead.');
     resetCameraView();
   }

@@ -32,16 +32,17 @@ router.post('/analyze', async (req, res) => {
             },
             {
               type: 'text',
-              text: "Does this image contain a real human face or a portrait photo suitable for a skin analysis? Answer ONLY with 'YES' or 'NO', followed by a very brief explanation."
+              text: "Analyze this image. Does it contain a human face? Answer with YES or NO."
             }
           ]
         }
       ],
-      max_tokens: 60,
-      temperature: 0.2
+      max_tokens: 50,
+      temperature: 0.1
     });
 
     const valText = valMessage.choices?.[0]?.message?.content || '';
+    
     if (!valText.toUpperCase().includes('YES')) {
       return res.status(400).json({ error: 'Please upload a real photo of a face.' });
     }
