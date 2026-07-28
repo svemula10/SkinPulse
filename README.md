@@ -76,7 +76,7 @@ cd backend
 npm install
 
 //Run the Express server:
-npm run dev 
+node server.js
 ```
 
 Terminal 2: Frontend
