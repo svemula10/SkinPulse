@@ -1,4 +1,4 @@
-# SkinPulse - AI Skin Analysis & Clinical Ecosystem
+# SkinPulse - AI-Powered Skin Analysis Platform
 
 SkinPulse bridges the gap between expensive in-store clinical consultations and everyday skincare tracking. Built as a zero-friction, full-stack web application, SkinPulse allows users to upload a face photo or capture a live webcam snapshot to receive a deep dermatological evaluation, structured morning/evening regimens, exportable clinical PDF reports, and real-time environmental/ingredient safety guidance.
 
